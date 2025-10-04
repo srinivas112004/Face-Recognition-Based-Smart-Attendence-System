@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6C5CE7;
+            --secondary-color: #A29BFE;
+            --accent-color: #FD79A8;
+            --success-color: #00B894;
+            --warning-color: #FDCB6E;
+            --danger-color: #E17055;
+            --dark-color: #2D3436;
+            --light-color: #DDD6FE;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><circle cx="200" cy="200" r="150" fill="url(%23a)"/><circle cx="800" cy="300" r="100" fill="url(%23a)"/><circle cx="600" cy="700" r="120" fill="url(%23a)"/><circle cx="300" cy="800" r="80" fill="url(%23a)"/></svg>') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            z-index: 1030;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            padding: 6rem 0 2rem; /* Increased top padding to account for fixed navbar */
+            text-align: center;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: slideInDown 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: slideInUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stats-label {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 0.9s both;
+            overflow: hidden; /* Ensure header doesn't overflow */
+        }
+
+        .main-card:hover {
+            transform: translateY(-5px); /* Reduced hover effect */
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            margin: -2rem -2rem 2rem -2rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .card-header i {
+            font-size: 1.5rem;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-custom:hover::before {
+            left: 100%;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(108, 92, 231, 0.4);
+            color: white;
+        }
+
+        .btn-danger-custom {
+            background: linear-gradient(135deg, var(--danger-color), #ff6b7a);
+            box-shadow: 0 8px 20px rgba(225, 112, 85, 0.3);
+        }
+
+        .btn-danger-custom:hover {
+            box-shadow: 0 12px 25px rgba(225, 112, 85, 0.4);
+        }
+
+        .form-control-custom {
+            border: 2px solid rgba(108, 92, 231, 0.2);
+            border-radius: 15px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+            background: white;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .table-custom {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-custom thead {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .table-custom thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .table-custom tbody td {
+            padding: 1rem;
+            border-color: rgba(0, 0, 0, 0.05);
+            vertical-align: middle;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+
+        .alert-custom {
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        }
+
+        .badge-custom {
+            background: linear-gradient(135deg, var(--success-color), #55efc4);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 1rem auto;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-section {
+                padding: 5rem 0 2rem; /* Adjusted for mobile */
+            }
+            
+            .main-card {
+                margin-bottom: 1rem;
+                border-radius: 15px;
+            }
+            
+            .card-header {
+                border-radius: 15px 15px 0 0;
+            }
+            
+            .btn-custom {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+    </style>
+
+    <title>Face Recognition Attendance System</title>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-camera me-2"></i>
+                FaceAttend Pro
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a href="/users" class="nav-link me-3">
+                    <i class="fas fa-users me-2"></i>Manage Users
+                </a>
+                <span class="navbar-text">
+                    <i class="fas fa-calendar-alt me-2"></i>{{ datetoday2 }}
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">
+                <i class="fas fa-user-check me-3"></i>
+                Face Recognition Attendance
+            </h1>
+            <p class="hero-subtitle">
+                Modern, secure, and efficient attendance tracking powered by AI
+            </p>
+            
+            <!-- Stats Cards -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-card text-center">
+                        <div class="stats-number">{{ totalreg }}</div>
+                        <div class="stats-label">Registered Users</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-card text-center">
+                        <div class="stats-number">{{ l }}</div>
+                        <div class="stats-label">Present Today</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-card text-center">
+                        <div class="stats-number">
+                            {% if totalreg > 0 %}
+                                {{ "%.1f"|format((l / totalreg) * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                        <div class="stats-label">Attendance Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-custom" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if mess %}
+    <div class="container">
+        <div class="alert alert-danger alert-custom" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ mess }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 0; padding-top: 1rem;">
+        <div class="row">
+            <!-- Attendance Section -->
+            <div class="col-lg-8 mb-4">
+                <div class="main-card">
+                    <div class="card-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Today's Attendance</h3>
+                        <div class="ms-auto">
+                            <span class="badge badge-custom">{{ l }} Present</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <a href="/start" class="text-decoration-none">
+                            <button class="btn btn-custom btn-lg" id="startAttendanceBtn">
+                                <i class="fas fa-camera me-2"></i>
+                                Start Attendance Capture
+                            </button>
+                        </a>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Camera will automatically stop after detecting a face or press ESC to exit
+                            </small>
+                        </div>
+                    </div>
+
+                    {% if l > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-hashtag me-2"></i>S.No</th>
+                                    <th><i class="fas fa-user me-2"></i>Name</th>
+                                    <th><i class="fas fa-id-card me-2"></i>ID</th>
+                                    <th><i class="fas fa-clock me-2"></i>Check-in Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(l) %}
+                                <tr>
+                                    <td>{{ i+1 }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            {{ names[i] }}
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ rolls[i] }}</span></td>
+                                    <td>
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        {{ times[i] }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users feature-icon"></i>
+                        <h4 class="text-muted">No attendance recorded yet</h4>
+                        <p class="text-muted">Click "Start Attendance Capture" to begin recording attendance</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Add User Section -->
+            <div class="col-lg-4 mb-4">
+                <div class="main-card">
+                    <div class="card-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Add New User</h3>
+                    </div>
+                    
+                    <form action='/add' method="POST" enctype="multipart/form-data" id="addUserForm">
+                        <div class="mb-3">
+                            <label class="form-label form-label-custom">
+                                <i class="fas fa-user me-2"></i>Full Name
+                            </label>
+                            <input type="text" class="form-control form-control-custom" id="newusername" name='newusername' 
+                                   placeholder="Enter full name" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label form-label-custom">
+                                <i class="fas fa-id-badge me-2"></i>User ID
+                            </label>
+                            <input type="number" class="form-control form-control-custom" id="newuserid" name='newuserid' 
+                                   placeholder="Enter unique ID" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type='submit' class='btn btn-danger-custom btn-lg' id="addUserBtn">
+                                <i class="fas fa-plus me-2"></i>
+                                Register New User
+                            </button>
+                        </div>
+                        
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <p class="text-center mt-2">Capturing face data...</p>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4 p-3 bg-light rounded-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-database feature-icon me-3" style="font-size: 2rem;"></i>
+                            <div>
+                                <h5 class="mb-1">Database Status</h5>
+                                <p class="mb-0 text-muted">{{ totalreg }} users registered</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <p>&copy; 2025 Face Recognition Attendance System. Built with ❤️ using Flask & OpenCV</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Form submission handling
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('addUserBtn');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            spinner.style.display = 'block';
+        });
+
+        // Input validation
+        document.getElementById('newuserid').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (value < 0) {
+                e.target.value = '';
+            }
+        });
+
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Auto-refresh attendance data every 30 seconds
+        setInterval(function() {
+            // Only refresh if we're on the main page and not in the middle of adding a user
+            if (!document.getElementById('addUserBtn').disabled) {
+                location.reload();
+            }
+        }, 30000);
+
+        // Add some interactive feedback
+        document.querySelectorAll('.btn-custom').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Handle attendance button click with loading state
+        document.getElementById('startAttendanceBtn').addEventListener('click', function(e) {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Starting Camera...';
+            this.disabled = true;
+            
+            // Re-enable after 3 seconds in case of error
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-camera me-2"></i>Start Attendance Capture';
+                this.disabled = false;
+            }, 3000);
+        });
+    </script>
+</body>
+
+</html>
