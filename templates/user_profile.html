@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6C5CE7;
+            --secondary-color: #A29BFE;
+            --accent-color: #FD79A8;
+            --success-color: #00B894;
+            --warning-color: #FDCB6E;
+            --danger-color: #E17055;
+            --dark-color: #2D3436;
+            --light-color: #DDD6FE;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            color: #2d3436;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark Mode Theme */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .navbar {
+            background: rgba(15, 23, 42, 0.95) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .navbar-brand {
+            color: #a29bfe !important;
+        }
+
+        body.dark-mode .main-card,
+        body.dark-mode .stats-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .table-custom {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        body.dark-mode .table-custom tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-mode .stats-label {
+            color: #cbd5e1;
+        }
+
+        body.dark-mode .modal-content {
+            background: #1e293b;
+            color: #f8fafc;
+            border-color: #334155;
+        }
+
+        body.dark-mode .form-control {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.85rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.4rem;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem 1.5rem;
+            margin: -2rem -2rem 1.5rem -2rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stats-label {
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .user-avatar-large {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 2rem;
+            box-shadow: 0 6px 15px rgba(108, 92, 231, 0.35);
+        }
+
+        .table-custom {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            font-size: 0.92rem;
+        }
+
+        .table-custom thead {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .table-custom thead th {
+            border: none;
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+        }
+
+        .table-custom tbody td {
+            padding: 0.85rem 1rem;
+            border-color: rgba(0, 0, 0, 0.05);
+            vertical-align: middle;
+        }
+
+        .status-badge-ontime {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            color: #0d3d2e;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge-late {
+            background: linear-gradient(135deg, #fdcb6e, #ffeaa7);
+            color: #634a00;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge-absent {
+            background: linear-gradient(135deg, #ff7675, #fab1a0);
+            color: #5c0f0f;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge-leave {
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            color: #102e52;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge-manual {
+            background: linear-gradient(135deg, #55efc4, #81ecec);
+            color: #0c4a3e;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 0.65rem 1.4rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-custom:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .pill-btn {
+            cursor: pointer;
+            border: 1px solid rgba(108, 92, 231, 0.4);
+            border-radius: 20px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: white;
+            color: var(--primary-color);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .pill-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+    </style>
+
+    <title>{{ user_name }} - Attendance Portal</title>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-camera me-2"></i>
+                {{ org_name }}
+            </a>
+            <div class="navbar-nav ms-auto align-items-center gap-2">
+                <button class="pill-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon me-1" id="themeIcon"></i>
+                    <span id="themeText">Dark</span>
+                </button>
+                
+                {% if user_role == 'admin' %}
+                <a href="/users" class="nav-link">
+                    <i class="fas fa-users me-1"></i>Manage Users
+                </a>
+                {% endif %}
+
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+
+                <!-- Password change for student -->
+                {% if user_role == 'user' %}
+                <button class="pill-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" title="Change your password">
+                    <i class="fas fa-key me-1"></i>Password
+                </button>
+                {% endif %}
+
+                <a href="/logout" class="pill-btn border-danger text-danger" title="Sign out">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 90px; padding-top: 1rem;">
+        <!-- Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="main-card">
+            <div class="card-header-custom">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="user-avatar-large">
+                        {{ user_name[0].upper() }}
+                    </div>
+                    <div>
+                        <h3 class="mb-1">{{ user_name }}</h3>
+                        <p class="mb-0 text-light small opacity-75">
+                            <span class="badge bg-light text-dark me-2">Roll ID: {{ user_roll }}</span>
+                            <span class="badge bg-success-subtle text-success border border-success">
+                                <i class="fas fa-check-circle me-1"></i>Active Student
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="text-end d-flex gap-2 align-items-center">
+                    <a href="/start" class="btn btn-sm btn-light text-primary fw-bold shadow-sm">
+                        <i class="fas fa-camera me-1"></i>Scan Attendance
+                    </a>
+                    {% if user_role == 'admin' %}
+                    <a href="/users" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-arrow-left me-1"></i>All Users
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Attendance Stats Overview -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stats-card">
+                        <div class="stats-number text-primary">{{ total_sessions }}</div>
+                        <div class="stats-label">Days Tracked</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stats-card">
+                        <div class="stats-number text-success">{{ days_present }}</div>
+                        <div class="stats-label">Days Present</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stats-card">
+                        <div class="stats-number text-danger">{{ days_absent }}</div>
+                        <div class="stats-label">Days Absent</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stats-card">
+                        <div class="stats-number text-info">{{ "%.1f"|format(attendance_pct) }}%</div>
+                        <div class="stats-label">Attendance Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                    <span>Attendance Consistency</span>
+                    <span>{{ days_present }}/{{ total_sessions }} Days ({{ "%.1f"|format(attendance_pct) }}%)</span>
+                </div>
+                <div class="progress" style="height: 12px; border-radius: 8px;">
+                    <div class="progress-bar {% if attendance_pct >= 75 %}bg-success{% elif attendance_pct >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                         role="progressbar" 
+                         style="width: {{ attendance_pct }}%;" 
+                         aria-valuenow="{{ attendance_pct }}" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Attendance Log Table -->
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-history me-2 text-primary"></i>Personal Attendance Log
+            </h5>
+
+            {% if history_records %}
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-calendar-alt me-1"></i>Date</th>
+                            <th><i class="fas fa-sign-in-alt me-1"></i>Check-In</th>
+                            <th><i class="fas fa-sign-out-alt me-1"></i>Check-Out</th>
+                            <th><i class="fas fa-hourglass-half me-1"></i>Duration</th>
+                            <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in history_records %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><strong>{{ record.date_display }}</strong></td>
+                            <td>
+                                {% if record.check_in != '-' and record.check_in != '' %}
+                                    <span class="text-success fw-semibold"><i class="fas fa-clock me-1"></i>{{ record.check_in }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.check_out != '-' and record.check_out != '' %}
+                                    <span class="text-danger fw-semibold"><i class="fas fa-door-open me-1"></i>{{ record.check_out }}</span>
+                                {% elif record.status in ['On Time', 'Late', 'Present (Manual)'] %}
+                                    <span class="badge bg-light text-muted border">In Progress</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.duration != '-' and record.duration != '' %}
+                                    <span class="badge bg-info text-dark">{{ record.duration }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.status == 'On Time' %}
+                                    <span class="status-badge-ontime"><i class="fas fa-check-circle"></i> On Time</span>
+                                {% elif record.status == 'Late' %}
+                                    <span class="status-badge-late"><i class="fas fa-clock"></i> Late</span>
+                                {% elif 'Manual' in record.status %}
+                                    <span class="status-badge-manual"><i class="fas fa-user-edit"></i> {{ record.status }}</span>
+                                {% elif record.status == 'On Leave' %}
+                                    <span class="status-badge-leave"><i class="fas fa-calendar-minus"></i> On Leave</span>
+                                {% else %}
+                                    <span class="status-badge-absent"><i class="fas fa-times-circle"></i> Absent</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-folder-open me-1"></i> No recorded attendance sessions found yet.
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="/" class="btn btn-custom">
+                    <i class="fas fa-home"></i> Back to Public Board
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Change Password Modal -->
+    {% if user_role == 'user' %}
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/change_user_password" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-key me-2 text-primary"></i>Change Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">New Password</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Enter new password" required minlength="1">
+                            <small class="text-muted">Choose a secure password to protect your student portal.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Theme Toggle (Dark/Light mode)
+        const currentTheme = localStorage.getItem('faceattend_theme') || 'light';
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeIcon').className = 'fas fa-sun me-1 text-warning';
+            document.getElementById('themeText').textContent = 'Light';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('faceattend_theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-sun me-1 text-warning' : 'fas fa-moon me-1';
+            document.getElementById('themeText').textContent = isDark ? 'Light' : 'Dark';
+        }
+    </script>
+</body>
+
+</html>

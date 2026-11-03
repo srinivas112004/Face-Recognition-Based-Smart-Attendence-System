@@ -4,12 +4,19 @@
 A modern, professional Flask-based web application that uses advanced face recognition technology to automate attendance tracking. The system features a sleek UI, intelligent face detection, and automatic attendance recording with smart camera controls.
 
 ## 🌟 Key Highlights
-- **Modern UI/UX**: Professional glass-morphism design with responsive layout
-- **Smart Camera Control**: Automatic camera stop after attendance recording
+- **Admin Authentication & RBAC**: Secure login portal with password hashing protecting administrative features
+- **Modern UI/UX**: Professional glass-morphism design with Dark & Light theme switcher
+- **Dual Punch System**: Intelligent Check-In and Check-Out with total duration tracking
+- **Late vs. On-Time Tagging**: Automatic status badge evaluation against customizable cutoff time
+- **Absentee Tracking & Manual Override**: Instant identification of absent users with 1-click manual "Present" or "On Leave" marking
+- **Individual Student Profiles**: Comprehensive attendance history page for each student with consistency tracking
+- **System Settings Configuration**: Custom Organization Name and Cutoff Time editable directly from UI (`config.json`)
+- **Historical Attendance Viewer**: Integrated date picker to review and query past records
+- **One-Click CSV Export**: Download attendance reports for today or any historical date
+- **Voice & Audio Feedback**: Browser Text-to-Speech greeting and synthesized confirmation chimes
+- **Instant Live Search**: Real-time filtering across attendance and registered user tables
 - **Intelligent Recognition**: Progressive face detection with confidence tracking
-- **Real-time Statistics**: Live attendance metrics and progress tracking
-- **User Management**: Complete CRUD operations for user management
-- **Mobile Responsive**: Optimized for all devices and screen sizes
+- **User Management**: Complete CRUD operations for user management and automatic model retraining
 
 ## 🚀 Enhanced Features
 
@@ -90,23 +97,43 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 
 ## 📁 Enhanced Project Structure
 ```
-face_recognition_flask-main/
-├── app.py                              # 🚀 Main Flask application (Enhanced)
+Face-Recognition-Based-Smart-Attendence-System/
+├── app.py                              # 🚀 Main Flask application
+├── config.json                         # ⚙️ System configuration (Admin, Cutoff time, Org name)
+├── users_auth.json                     # 🔑 User/Student authentication credentials
 ├── background.png                      # 🎨 UI background image
-├── haarcascade_frontalface_default.xml # 👤 Face detection model
-├── requirements.txt                    # 📦 Python dependencies (Updated)
-├── README.md                          # 📖 Documentation (You are here!)
+├── haarcascade_frontalface_default.xml # 👤 OpenCV Face detection cascade model
+├── requirements.txt                    # 📦 Python dependencies
+├── README.md                          # 📖 Documentation
+├── .gitignore                         # 🙈 Git ignore rules
 ├── Attendance/                        # 📊 Daily attendance CSV files
+│   ├── .gitkeep
 │   └── Attendance-[MM_DD_YY].csv     
 ├── static/                           # 🗂️ Static assets
-│   ├── css/
-│   │   └── style.css                 # 🎨 Additional custom styles
-│   ├── faces/                        # 👥 User face images (auto-organized)
+│   ├── faces/                        # 👥 Enrolled facial samples
 │   │   └── [username_id]/            
-│   └── face_recognition_model.pkl    # 🧠 Trained ML model
+│   └── face_recognition_model.pkl    # 🧠 Trained KNN ML model
 └── templates/                        # 🌐 HTML templates
-    ├── home.html                     # 🏠 Enhanced main dashboard
-    └── users.html                    # 👥 User management page
+    ├── home.html                     # 🏠 Modern dashboard with live stats & tabs
+    ├── login.html                    # 🔐 Dual role login (Admin & Student)
+    ├── users.html                    # 👥 User management portal
+    ├── user_profile.html             # 👤 Student attendance history & self-service
+    └── add_user.html                 # ➕ User registration template
+```
+
+## 🚀 Pushing to GitHub
+
+To push this repository to your GitHub account:
+
+```bash
+# 1. Add your GitHub repository remote URL
+git remote add origin https://github.com/<your-username>/<your-repo-name>.git
+
+# 2. Rename branch to main
+git branch -M main
+
+# 3. Push to GitHub
+git push -u origin main
 ```
 
 ## 📖 How to Use
@@ -222,21 +249,20 @@ face_recognition_flask-main/
 | Static files not loading | Check file permissions and paths |
 | Database errors | Ensure Attendance folder exists |
 
-## 🔐 Security & Privacy
+## 🔐 Security & Dual Authentication
 
-### **Current Security Level** 🛡️
-- ⚠️ **Development Mode**: Debug enabled, not production-ready
-- ⚠️ **No Authentication**: Open access to all features
-- ⚠️ **Local Storage**: All data stored locally without encryption
-- ⚠️ **Network Access**: Application accessible on local network
-
-### **Production Recommendations** 🔒
-- Add user authentication and authorization
-- Implement HTTPS with SSL certificates
-- Use encrypted database for sensitive data
-- Add rate limiting and input validation
-- Implement audit logging
-- Use environment variables for configuration
+### **Role-Based Access Control (RBAC)** 🛡️
+- **Admin Portal**:
+  - **Credentials**: `admin` / `admin123`
+  - **Capabilities**: Enroll faces, retrain models, delete users, configure cutoff times, manual override, reset records, and export reports.
+- **Student / Employee Self-Service Portal**:
+  - **Credentials**:
+    - **User ID**: Student's Roll ID (e.g., `1`, `10`, `101`)
+    - **Password**: User's Roll ID (or `user123` by default)
+  - **Capabilities**: View personal attendance history, punch-in/out log, attendance rate percentage, and change personal account password.
+  - **Privacy Protected**: Students can only view their own attendance records; access to administrative management is strictly forbidden.
+- **Password Security**: Passwords are cryptographically hashed using Werkzeug (`scrypt` / `pbkdf2`) and stored in `users_auth.json`.
+- **Public Kiosk Mode**: The main live attendance board and facial recognition scanner (`/start`) remain hands-free and open for entrance terminals.
 
 ## 🚀 Future Enhancements
 

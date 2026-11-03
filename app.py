@@ -1,20 +1,135 @@
 import cv2
 import os
-from flask import Flask, request, render_template, jsonify, flash, redirect, url_for
+from flask import Flask, request, render_template, jsonify, flash, redirect, url_for, send_file, session
 from datetime import date, datetime
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 import pandas as pd
 import joblib
 import json
+from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this to a random secret key
+app.secret_key = 'smart-face-attendance-secret-key-change-in-prod'
 
 # Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 nimgs = 10
+
+# Configuration Management
+CONFIG_FILE = os.path.join(BASE_DIR, 'config.json')
+USERS_AUTH_FILE = os.path.join(BASE_DIR, 'users_auth.json')
+
+DEFAULT_CONFIG = {
+    'org_name': 'FaceAttend Pro',
+    'cutoff_time': '09:30:00',
+    'auto_camera_timeout': 10,
+    'admin_username': 'admin',
+    'admin_password': 'admin123'
+}
+
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                return {**DEFAULT_CONFIG, **json.load(f)}
+        except Exception:
+            return DEFAULT_CONFIG
+    return DEFAULT_CONFIG
+
+def save_config(cfg):
+    try:
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(cfg, f, indent=4)
+        return True
+    except Exception:
+        return False
+
+def load_user_auth():
+    if os.path.exists(USERS_AUTH_FILE):
+        try:
+            with open(USERS_AUTH_FILE, 'r') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_user_auth(auth_data):
+    try:
+        with open(USERS_AUTH_FILE, 'w') as f:
+            json.dump(auth_data, f, indent=4)
+        return True
+    except Exception:
+        return False
+
+def check_admin_credentials(username, password):
+    cfg = load_config()
+    cfg_user = cfg.get('admin_username', 'admin')
+    cfg_pwd = cfg.get('admin_password', 'admin123')
+    
+    if username != cfg_user:
+        return False
+        
+    if str(cfg_pwd).startswith('pbkdf2:') or str(cfg_pwd).startswith('scrypt:'):
+        return check_password_hash(cfg_pwd, password)
+    else:
+        return str(cfg_pwd) == password
+
+def check_user_credentials(user_id, password):
+    """
+    Validates a student/user's credentials.
+    Default password for any registered user is their User ID or 'user123'.
+    Custom passwords set by the user are stored in users_auth.json.
+    """
+    user_id_str = str(user_id).strip()
+    userlist, names, rolls, total = getallusers()
+    
+    user_name = None
+    for i in range(total):
+        if str(rolls[i]).strip() == user_id_str:
+            user_name = names[i]
+            break
+            
+    if not user_name:
+        return False, None
+        
+    auth_data = load_user_auth()
+    if user_id_str in auth_data:
+        saved_pwd = auth_data[user_id_str].get('password', '')
+        if str(saved_pwd).startswith('pbkdf2:') or str(saved_pwd).startswith('scrypt:'):
+            if check_password_hash(saved_pwd, password):
+                return True, user_name
+        elif saved_pwd == password:
+            return True, user_name
+    else:
+        # Default accepted passwords: user's Roll ID or 'user123'
+        if password == user_id_str or password == 'user123':
+            return True, user_name
+            
+    return False, None
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            flash('Administrator login required to access this feature.', 'warning')
+            return redirect(url_for('login', next=request.url))
+        if session.get('role') != 'admin':
+            flash('Administrator privileges required.', 'error')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            flash('Please log in to continue.', 'warning')
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Initialize background image
 if os.path.exists(os.path.join(BASE_DIR, "background.png")):
@@ -23,9 +138,51 @@ else:
     imgBackground = None
     print("Warning: background.png not found. Using default background.")
 
-datetoday = date.today().strftime("%m_%d_%y")
-datetoday2 = date.today().strftime("%d-%B-%Y")
+def get_datetoday():
+    return date.today().strftime("%m_%d_%y")
 
+def get_datetoday2():
+    return date.today().strftime("%d-%B-%Y")
+
+def format_date_for_display(date_obj):
+    return date_obj.strftime("%d-%B-%Y")
+
+def date_to_str(date_obj):
+    return date_obj.strftime("%m_%d_%y")
+
+def parse_date_query(date_str):
+    """Parses 'YYYY-MM-DD' or 'MM_DD_YY' into a datetime.date object, defaulting to today."""
+    if not date_str:
+        return date.today()
+    date_str = str(date_str).strip()
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        try:
+            return datetime.strptime(date_str, "%m_%d_%y").date()
+        except ValueError:
+            return date.today()
+
+def calculate_duration(t_in_str, t_out_str):
+    """Calculates human-readable duration between two HH:MM:SS timestamps."""
+    try:
+        t_in = datetime.strptime(str(t_in_str).strip(), "%H:%M:%S")
+        t_out = datetime.strptime(str(t_out_str).strip(), "%H:%M:%S")
+        diff = t_out - t_in
+        total_seconds = int(diff.total_seconds())
+        if total_seconds < 0:
+            return "0m"
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        if hours > 0:
+            return f"{hours}h {minutes}m"
+        elif minutes > 0:
+            return f"{minutes}m {seconds}s"
+        else:
+            return f"{seconds}s"
+    except Exception:
+        return "-"
 
 face_detector = cv2.CascadeClassifier(os.path.join(BASE_DIR, 'haarcascade_frontalface_default.xml'))
 
@@ -40,12 +197,16 @@ if not os.path.isdir(STATIC_DIR):
     os.makedirs(STATIC_DIR)
 if not os.path.isdir(FACES_DIR):
     os.makedirs(FACES_DIR)
-if f'Attendance-{datetoday}.csv' not in os.listdir(ATTENDANCE_DIR):
-    with open(os.path.join(ATTENDANCE_DIR, f'Attendance-{datetoday}.csv'), 'w') as f:
-        f.write('Name,Roll,Time')
+
+initial_attendance_file = os.path.join(ATTENDANCE_DIR, f'Attendance-{get_datetoday()}.csv')
+if not os.path.exists(initial_attendance_file):
+    with open(initial_attendance_file, 'w') as f:
+        f.write('Name,Roll,Time,CheckOut,Duration,Status\n')
 
 def totalreg():
-    return len(os.listdir(FACES_DIR))
+    if not os.path.isdir(FACES_DIR):
+        return 0
+    return len([d for d in os.listdir(FACES_DIR) if os.path.isdir(os.path.join(FACES_DIR, d))])
 
 def extract_faces(img):
     try:
@@ -59,95 +220,604 @@ def identify_face(facearray):
     model = joblib.load(os.path.join(STATIC_DIR, 'face_recognition_model.pkl'))
     return model.predict(facearray)
 
-
 def train_model():
     faces = []
     labels = []
-    userlist = os.listdir(FACES_DIR)
+    userlist = [u for u in os.listdir(FACES_DIR) if os.path.isdir(os.path.join(FACES_DIR, u))]
     for user in userlist:
-        for imgname in os.listdir(os.path.join(FACES_DIR, user)):
-            img = cv2.imread(os.path.join(FACES_DIR, user, imgname))
-            resized_face = cv2.resize(img, (50, 50))
-            faces.append(resized_face.ravel())
-            labels.append(user)
+        user_dir = os.path.join(FACES_DIR, user)
+        for imgname in os.listdir(user_dir):
+            img = cv2.imread(os.path.join(user_dir, imgname))
+            if img is not None:
+                resized_face = cv2.resize(img, (50, 50))
+                faces.append(resized_face.ravel())
+                labels.append(user)
+    if len(faces) == 0:
+        model_path = os.path.join(STATIC_DIR, 'face_recognition_model.pkl')
+        if os.path.exists(model_path):
+            os.remove(model_path)
+        return
     faces = np.array(faces)
-    knn = KNeighborsClassifier(n_neighbors=5)
+    n_neighbors = min(5, len(faces))
+    knn = KNeighborsClassifier(n_neighbors=n_neighbors)
     knn.fit(faces, labels)
     joblib.dump(knn, os.path.join(STATIC_DIR, 'face_recognition_model.pkl'))
 
-def extract_attendance():
-    df = pd.read_csv(os.path.join(ATTENDANCE_DIR, f'Attendance-{datetoday}.csv'))
-    names = df['Name']
-    rolls = df['Roll']
-    times = df['Time']
+def extract_attendance(target_date=None):
+    """
+    Extracts attendance for a given date.
+    Backward-compatible with older 3-column CSV files.
+    """
+    if target_date is None:
+        target_date = date.today()
+    date_code = date_to_str(target_date)
+    attendance_file = os.path.join(ATTENDANCE_DIR, f'Attendance-{date_code}.csv')
+    
+    expected_columns = ['Name', 'Roll', 'Time', 'CheckOut', 'Duration', 'Status']
+    cfg = load_config()
+    cutoff_time = cfg.get('cutoff_time', '09:30:00')
+
+    if not os.path.exists(attendance_file):
+        if target_date == date.today():
+            with open(attendance_file, 'w') as f:
+                f.write(','.join(expected_columns) + '\n')
+        else:
+            return [], [], [], [], [], [], 0
+
+    try:
+        df = pd.read_csv(attendance_file)
+    except Exception:
+        return [], [], [], [], [], [], 0
+
+    if 'Name' not in df.columns or len(df) == 0:
+        return [], [], [], [], [], [], 0
+
+    if 'Roll' not in df.columns:
+        df['Roll'] = '0'
+    if 'Time' not in df.columns:
+        df['Time'] = '-'
+    if 'CheckOut' not in df.columns:
+        df['CheckOut'] = '-'
+    if 'Duration' not in df.columns:
+        df['Duration'] = '-'
+    if 'Status' not in df.columns:
+        def compute_status(t_val):
+            try:
+                t_str = str(t_val).strip()
+                if t_str != '-' and t_str:
+                    return 'On Time' if t_str <= cutoff_time else 'Late'
+            except Exception:
+                pass
+            return 'On Time'
+        df['Status'] = df['Time'].apply(compute_status)
+
+    # Clean missing / NaN values
+    df['CheckOut'] = df['CheckOut'].fillna('-').astype(str)
+    df['Duration'] = df['Duration'].fillna('-').astype(str)
+    df['Status'] = df['Status'].fillna('On Time').astype(str)
+    df['Time'] = df['Time'].fillna('-').astype(str)
+    df['Roll'] = df['Roll'].fillna('0').astype(str)
+    df['Name'] = df['Name'].fillna('Unknown').astype(str)
+
+    names = list(df['Name'])
+    rolls = list(df['Roll'])
+    times = list(df['Time'])
+    checkouts = list(df['CheckOut'])
+    durations = list(df['Duration'])
+    statuses = list(df['Status'])
     l = len(df)
-    return names, rolls, times, l
+    return names, rolls, times, checkouts, durations, statuses, l
 
 def add_attendance(name):
-    username = name.split('_')[0]
-    userid = name.split('_')[1]
+    """
+    Handles both Check-In and Check-Out.
+    1st scan: Check-In (records entry time and calculates On-Time / Late status)
+    2nd scan: Check-Out (records exit time and calculates duration)
+    3rd scan+: Informs that attendance has already been completed today.
+    """
+    parts = name.rsplit('_', 1)
+    username = parts[0]
+    userid = parts[1] if len(parts) > 1 else '0'
     current_time = datetime.now().strftime("%H:%M:%S")
 
-    df = pd.read_csv(os.path.join(ATTENDANCE_DIR, f'Attendance-{datetoday}.csv'))
-    
-    # Check if user already marked attendance today
-    if int(userid) not in list(df['Roll']):
-        with open(os.path.join(ATTENDANCE_DIR, f'Attendance-{datetoday}.csv'), 'a') as f:
-            f.write(f'\n{username},{userid},{current_time}')
-        return True
+    today_date = date.today()
+    date_code = date_to_str(today_date)
+    attendance_file = os.path.join(ATTENDANCE_DIR, f'Attendance-{date_code}.csv')
+    expected_columns = ['Name', 'Roll', 'Time', 'CheckOut', 'Duration', 'Status']
+
+    cfg = load_config()
+    cutoff_time = cfg.get('cutoff_time', '09:30:00')
+
+    if not os.path.exists(attendance_file):
+        with open(attendance_file, 'w') as f:
+            f.write(','.join(expected_columns) + '\n')
+
+    df = pd.read_csv(attendance_file)
+    for col in expected_columns:
+        if col not in df.columns:
+            df[col] = '-'
+
+    df['Roll'] = df['Roll'].astype(str).str.strip()
+    target_roll = str(userid).strip()
+
+    if target_roll not in df['Roll'].values:
+        # First scan today: Check-In!
+        status = "On Time" if current_time <= cutoff_time else "Late"
+        new_row = pd.DataFrame([{
+            'Name': username,
+            'Roll': target_roll,
+            'Time': current_time,
+            'CheckOut': '-',
+            'Duration': '-',
+            'Status': status
+        }])
+        df = pd.concat([df, new_row], ignore_index=True)
+        df.to_csv(attendance_file, index=False)
+        return 'checkin', username, current_time, status
     else:
-        return False  # Already marked attendance
+        # User already exists in today's attendance: check if they need Check-Out
+        idx = df.index[df['Roll'] == target_roll].tolist()[0]
+        current_checkout = str(df.at[idx, 'CheckOut']).strip()
+
+        if current_checkout in ['-', '', 'nan', 'None']:
+            # Second scan: Check-Out!
+            checkin_time = str(df.at[idx, 'Time']).strip()
+            duration = calculate_duration(checkin_time, current_time)
+            df.at[idx, 'CheckOut'] = current_time
+            df.at[idx, 'Duration'] = duration
+            df.to_csv(attendance_file, index=False)
+            return 'checkout', username, current_time, duration
+        else:
+            # Already completed both Check-In and Check-Out today
+            return 'already_done', username, str(df.at[idx, 'Time']), current_checkout
 
 def getallusers():
-    userlist = os.listdir(FACES_DIR)
+    if not os.path.isdir(FACES_DIR):
+        return [], [], [], 0
+    raw_userlist = [u for u in os.listdir(FACES_DIR) if os.path.isdir(os.path.join(FACES_DIR, u))]
+    userlist = []
     names = []
     rolls = []
-    l = len(userlist)
 
-    for i in userlist:
-        name, roll = i.split('_')
-        names.append(name)
-        rolls.append(roll)
+    for i in raw_userlist:
+        if '_' in i:
+            name, roll = i.rsplit('_', 1)
+            userlist.append(i)
+            names.append(name)
+            rolls.append(roll)
+        else:
+            userlist.append(i)
+            names.append(i)
+            rolls.append('N/A')
 
-    return userlist, names, rolls, l
+    return userlist, names, rolls, len(userlist)
 
+def get_absent_users(present_rolls):
+    """Returns list of registered users who have not marked attendance."""
+    userlist, names, rolls, total_registered = getallusers()
+    present_set = {str(r).strip() for r in present_rolls}
+    absent = []
+    for i in range(total_registered):
+        roll_str = str(rolls[i]).strip()
+        if roll_str not in present_set:
+            absent.append({
+                'name': names[i],
+                'roll': rolls[i],
+                'user_dir': userlist[i]
+            })
+    return absent
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Unified login for Administrators and Students/Users."""
+    if session.get('logged_in'):
+        if session.get('role') == 'user':
+            return redirect(url_for('my_attendance'))
+        return redirect(url_for('home'))
+        
+    if request.method == 'POST':
+        login_type = request.form.get('login_type', 'admin').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        if login_type == 'admin':
+            if check_admin_credentials(username, password):
+                session['logged_in'] = True
+                session['role'] = 'admin'
+                session['admin_user'] = username
+                flash(f'Welcome back, {username}! Successfully signed in as Administrator.', 'success')
+                next_url = request.args.get('next')
+                if next_url and next_url.startswith('/'):
+                    return redirect(next_url)
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid Administrator username or password.', 'error')
+        else:
+            # Student / User Login
+            success, user_name = check_user_credentials(username, password)
+            if success:
+                session['logged_in'] = True
+                session['role'] = 'user'
+                session['user_id'] = str(username).strip()
+                session['user_name'] = user_name
+                flash(f'Welcome, {user_name}! Successfully signed in.', 'success')
+                next_url = request.args.get('next')
+                if next_url and next_url.startswith('/'):
+                    return redirect(next_url)
+                return redirect(url_for('my_attendance'))
+            else:
+                flash(f'Invalid User ID or password. Ensure User ID "{username}" is registered.', 'error')
+            
+    cfg = load_config()
+    return render_template(
+        'login.html',
+        org_name=cfg.get('org_name', 'FaceAttend Pro'),
+        datetoday2=get_datetoday2()
+    )
+
+@app.route('/logout')
+def logout():
+    """Administrator & Student Logout Route."""
+    session.pop('logged_in', None)
+    session.pop('role', None)
+    session.pop('admin_user', None)
+    session.pop('user_id', None)
+    session.pop('user_name', None)
+    flash('You have been logged out successfully.', 'info')
+    return redirect(url_for('home'))
+
+@app.route('/my_attendance')
+@login_required
+def my_attendance():
+    """Direct route for logged-in students to view their personal attendance."""
+    if session.get('role') == 'admin':
+        return redirect(url_for('home'))
+    user_roll = session.get('user_id')
+    return redirect(url_for('user_profile', roll=user_roll))
+
+@app.route('/change_user_password', methods=['POST'])
+@login_required
+def change_user_password():
+    """Allows students to update their password."""
+    if session.get('role') != 'user':
+        flash('Password change route for users only.', 'error')
+        return redirect(url_for('home'))
+        
+    user_id = session.get('user_id')
+    new_password = request.form.get('new_password', '').strip()
+    if not new_password:
+        flash('New password cannot be empty.', 'error')
+        return redirect(url_for('my_attendance'))
+        
+    auth_data = load_user_auth()
+    auth_data[str(user_id)] = {
+        'password': generate_password_hash(new_password),
+        'name': session.get('user_name', '')
+    }
+    save_user_auth(auth_data)
+    flash('Your password has been updated successfully!', 'success')
+    return redirect(url_for('my_attendance'))
 
 @app.route('/')
 def home():
-    names, rolls, times, l = extract_attendance()
-    return render_template('home.html', names=names, rolls=rolls, times=times, l=l, totalreg=totalreg(), datetoday2=datetoday2)
+    date_query = request.args.get('date', '').strip()
+    selected_date = parse_date_query(date_query) if date_query else date.today()
+    is_today = (selected_date == date.today())
+    
+    cfg = load_config()
+    cutoff_time = cfg.get('cutoff_time', '09:30:00')
+    org_name = cfg.get('org_name', 'FaceAttend Pro')
+
+    names, rolls, times, checkouts, durations, statuses, l = extract_attendance(selected_date)
+    total_registered = totalreg()
+    absent_list = get_absent_users(rolls)
+    absent_count = len(absent_list)
+    
+    on_time_count = sum(1 for s in statuses if s == 'On Time')
+    late_count = sum(1 for s in statuses if s == 'Late')
+    
+    return render_template(
+        'home.html',
+        names=names,
+        rolls=rolls,
+        times=times,
+        checkouts=checkouts,
+        durations=durations,
+        statuses=statuses,
+        l=l,
+        totalreg=total_registered,
+        absent_list=absent_list,
+        absent_count=absent_count,
+        on_time_count=on_time_count,
+        late_count=late_count,
+        datetoday2=format_date_for_display(selected_date),
+        selected_date_iso=selected_date.strftime("%Y-%m-%d"),
+        today_iso=date.today().strftime("%Y-%m-%d"),
+        is_today=is_today,
+        cutoff_time=cutoff_time,
+        org_name=org_name,
+        is_logged_in=session.get('logged_in', False),
+        user_role=session.get('role'),
+        admin_user=session.get('admin_user', 'Admin'),
+        user_name=session.get('user_name', '')
+    )
+
+@app.route('/settings', methods=['POST'])
+@admin_required
+def update_settings():
+    """Update system settings (Admin Only)."""
+    org_name = request.form.get('org_name', '').strip() or 'FaceAttend Pro'
+    cutoff_time = request.form.get('cutoff_time', '').strip() or '09:30:00'
+    new_password = request.form.get('new_password', '').strip()
+    
+    cfg = load_config()
+    cfg['org_name'] = org_name
+    cfg['cutoff_time'] = cutoff_time
+    if new_password:
+        cfg['admin_password'] = generate_password_hash(new_password)
+        flash('Settings and admin password updated successfully!', 'success')
+    else:
+        flash('Settings updated successfully!', 'success')
+        
+    save_config(cfg)
+    return redirect(request.referrer or url_for('home'))
+
+@app.route('/mark_manual', methods=['POST'])
+@admin_required
+def mark_manual():
+    """Allows manual override to mark an absent student Present or On Leave (Admin Only)."""
+    target_roll = request.form.get('roll', '').strip()
+    status_choice = request.form.get('status', 'Present (Manual)').strip()
+    target_date_str = request.form.get('date', '').strip()
+    
+    target_date = parse_date_query(target_date_str) if target_date_str else date.today()
+    date_code = date_to_str(target_date)
+    attendance_file = os.path.join(ATTENDANCE_DIR, f'Attendance-{date_code}.csv')
+    expected_columns = ['Name', 'Roll', 'Time', 'CheckOut', 'Duration', 'Status']
+
+    userlist, names, rolls, total_registered = getallusers()
+    student_name = "Student"
+    for i in range(total_registered):
+        if str(rolls[i]).strip() == target_roll:
+            student_name = names[i]
+            break
+
+    if not os.path.exists(attendance_file):
+        with open(attendance_file, 'w') as f:
+            f.write(','.join(expected_columns) + '\n')
+
+    df = pd.read_csv(attendance_file)
+    for col in expected_columns:
+        if col not in df.columns:
+            df[col] = '-'
+
+    df['Roll'] = df['Roll'].astype(str).str.strip()
+    current_time = datetime.now().strftime("%H:%M:%S")
+
+    if target_roll in df['Roll'].values:
+        flash(f'{student_name} is already recorded for {format_date_for_display(target_date)}.', 'info')
+    else:
+        new_row = pd.DataFrame([{
+            'Name': student_name,
+            'Roll': target_roll,
+            'Time': current_time if 'Leave' not in status_choice else '-',
+            'CheckOut': '-',
+            'Duration': '-',
+            'Status': status_choice
+        }])
+        df = pd.concat([df, new_row], ignore_index=True)
+        df.to_csv(attendance_file, index=False)
+        flash(f'Manual attendance recorded for {student_name} ({status_choice})!', 'success')
+
+    return redirect(request.referrer or url_for('home', date=target_date.strftime("%Y-%m-%d")))
+
+@app.route('/reset_attendance', methods=['POST'])
+@admin_required
+def reset_attendance():
+    """Resets attendance records for the selected date (Admin Only)."""
+    target_date_str = request.form.get('date', '').strip()
+    target_date = parse_date_query(target_date_str) if target_date_str else date.today()
+    date_code = date_to_str(target_date)
+    attendance_file = os.path.join(ATTENDANCE_DIR, f'Attendance-{date_code}.csv')
+    expected_columns = ['Name', 'Roll', 'Time', 'CheckOut', 'Duration', 'Status']
+    
+    try:
+        with open(attendance_file, 'w') as f:
+            f.write(','.join(expected_columns) + '\n')
+        flash(f'Attendance records for {format_date_for_display(target_date)} have been reset.', 'info')
+    except Exception as e:
+        flash(f'Error resetting records: {str(e)}', 'error')
+
+    return redirect(url_for('home', date=target_date.strftime("%Y-%m-%d")))
+
+@app.route('/user_profile/<roll>')
+@login_required
+def user_profile(roll):
+    """
+    Displays detailed attendance history and statistics for a single student.
+    Admins can view any student; Students can only view their own profile.
+    """
+    target_roll = str(roll).strip()
+    
+    if session.get('role') == 'user':
+        logged_in_roll = str(session.get('user_id', '')).strip()
+        if logged_in_roll != target_roll:
+            flash('Access restricted. You can only view your own attendance profile.', 'warning')
+            return redirect(url_for('user_profile', roll=logged_in_roll))
+
+    userlist, names, rolls, total_registered = getallusers()
+    user_name = "User"
+    user_folder = ""
+    found = False
+    for i in range(total_registered):
+        if str(rolls[i]).strip() == target_roll:
+            user_name = names[i]
+            user_folder = userlist[i]
+            found = True
+            break
+            
+    if not found:
+        flash(f'User with ID {roll} not found.', 'error')
+        return redirect(url_for('home'))
+
+    cfg = load_config()
+    history_records = []
+    days_present = 0
+    days_absent = 0
+    days_leave = 0
+
+    if os.path.isdir(ATTENDANCE_DIR):
+        csv_files = [f for f in os.listdir(ATTENDANCE_DIR) if f.startswith('Attendance-') and f.endswith('.csv')]
+        
+        def get_file_date(fname):
+            try:
+                date_part = fname.replace('Attendance-', '').replace('.csv', '')
+                return datetime.strptime(date_part, "%m_%d_%y").date()
+            except Exception:
+                return date.min
+                
+        csv_files.sort(key=get_file_date, reverse=True)
+
+        for fname in csv_files:
+            file_date = get_file_date(fname)
+            if file_date == date.min:
+                continue
+            fpath = os.path.join(ATTENDANCE_DIR, fname)
+            try:
+                df = pd.read_csv(fpath)
+                if 'Roll' not in df.columns:
+                    continue
+                df['Roll'] = df['Roll'].astype(str).str.strip()
+                matches = df[df['Roll'] == target_roll]
+                if len(matches) > 0:
+                    row = matches.iloc[0]
+                    st = str(row.get('Status', 'On Time')).strip()
+                    cin = str(row.get('Time', '-')).strip()
+                    cout = str(row.get('CheckOut', '-')).strip()
+                    dur = str(row.get('Duration', '-')).strip()
+                    if 'Leave' in st:
+                        days_leave += 1
+                    else:
+                        days_present += 1
+                    history_records.append({
+                        'date_display': format_date_for_display(file_date),
+                        'check_in': cin,
+                        'check_out': cout,
+                        'duration': dur,
+                        'status': st
+                    })
+                else:
+                    days_absent += 1
+                    history_records.append({
+                        'date_display': format_date_for_display(file_date),
+                        'check_in': '-',
+                        'check_out': '-',
+                        'duration': '-',
+                        'status': 'Absent'
+                    })
+            except Exception:
+                pass
+
+    total_sessions = len(history_records)
+    attendance_pct = (days_present / total_sessions * 100) if total_sessions > 0 else 0
+
+    return render_template(
+        'user_profile.html',
+        user_name=user_name,
+        user_roll=target_roll,
+        user_folder=user_folder,
+        total_sessions=total_sessions,
+        days_present=days_present,
+        days_absent=days_absent,
+        days_leave=days_leave,
+        attendance_pct=attendance_pct,
+        history_records=history_records,
+        org_name=cfg.get('org_name', 'FaceAttend Pro'),
+        user_role=session.get('role', 'user')
+    )
+
+@app.route('/download')
+@app.route('/download/<date_str>')
+def download_csv(date_str=None):
+    """Download attendance CSV for today or selected date."""
+    if not date_str:
+        date_str = request.args.get('date', '').strip()
+    target_date = parse_date_query(date_str) if date_str else date.today()
+    date_code = date_to_str(target_date)
+    attendance_file = os.path.join(ATTENDANCE_DIR, f'Attendance-{date_code}.csv')
+    
+    expected_columns = ['Name', 'Roll', 'Time', 'CheckOut', 'Duration', 'Status']
+    if not os.path.exists(attendance_file):
+        with open(attendance_file, 'w') as f:
+            f.write(','.join(expected_columns) + '\n')
+            
+    return send_file(
+        attendance_file,
+        as_attachment=True,
+        download_name=f'Attendance-{target_date.strftime("%Y-%m-%d")}.csv',
+        mimetype='text/csv'
+    )
 
 @app.route('/api/stats')
 def get_stats():
     """API endpoint to get attendance statistics"""
-    names, rolls, times, l = extract_attendance()
+    date_query = request.args.get('date', '').strip()
+    selected_date = parse_date_query(date_query) if date_query else date.today()
+    names, rolls, times, checkouts, durations, statuses, l = extract_attendance(selected_date)
     total_registered = totalreg()
+    absent_count = max(0, total_registered - l)
     attendance_rate = (l / total_registered * 100) if total_registered > 0 else 0
+    
+    cfg = load_config()
+    cutoff_time = cfg.get('cutoff_time', '09:30:00')
+    on_time_count = sum(1 for s in statuses if s == 'On Time')
+    late_count = sum(1 for s in statuses if s == 'Late')
     
     return jsonify({
         'present_today': l,
+        'absent_today': absent_count,
         'total_registered': total_registered,
         'attendance_rate': round(attendance_rate, 1),
-        'date': datetoday2
+        'on_time_count': on_time_count,
+        'late_count': late_count,
+        'cutoff_time': cutoff_time,
+        'date': format_date_for_display(selected_date),
+        'date_iso': selected_date.strftime("%Y-%m-%d")
     })
 
 @app.route('/users')
+@admin_required
 def list_users():
-    """Display all registered users"""
+    """Display all registered users (Admin Only)"""
     userlist, names, rolls, l = getallusers()
-    return render_template('users.html', userlist=userlist, names=names, rolls=rolls, l=l, datetoday2=datetoday2)
+    cfg = load_config()
+    return render_template(
+        'users.html',
+        userlist=userlist,
+        names=names,
+        rolls=rolls,
+        l=l,
+        datetoday2=get_datetoday2(),
+        org_name=cfg.get('org_name', 'FaceAttend Pro'),
+        cutoff_time=cfg.get('cutoff_time', '09:30:00')
+    )
 
 @app.route('/delete_user/<username>')
+@admin_required
 def delete_user(username):
-    """Delete a user from the system"""
+    """Delete a user from the system (Admin Only)"""
     try:
         user_folder = os.path.join(FACES_DIR, username)
         if os.path.exists(user_folder):
             import shutil
             shutil.rmtree(user_folder)
-            # Retrain model after deletion
+            # Retrain model after deletion or clean up if none remain
             if totalreg() > 0:
                 train_model()
+            else:
+                model_file = os.path.join(STATIC_DIR, 'face_recognition_model.pkl')
+                if os.path.exists(model_file):
+                    os.remove(model_file)
             flash(f'User {username} has been successfully deleted!', 'success')
         else:
             flash(f'User {username} not found!', 'error')
@@ -158,11 +828,13 @@ def delete_user(username):
 
 @app.route('/start', methods=['GET'])
 def start():
-    names, rolls, times, l = extract_attendance()
-
     if 'face_recognition_model.pkl' not in os.listdir(STATIC_DIR):
         flash('There is no trained model in the static folder. Please add a new face to continue.', 'error')
         return redirect(url_for('home'))
+
+    attendance_taken = False
+    action_result = None
+    last_identified_person = None
 
     try:
         cap = cv2.VideoCapture(0)
@@ -172,12 +844,10 @@ def start():
             return redirect(url_for('home'))
         
         # Variables to control attendance capture
-        attendance_taken = False
         face_detected_frames = 0
         required_frames = 30  # Number of consecutive frames to confirm face detection
         max_frames = 300  # Maximum frames to prevent infinite loop (10 seconds at 30fps)
         frame_count = 0
-        last_identified_person = None
         
         while frame_count < max_frames and not attendance_taken:
             ret, frame = cap.read()
@@ -214,23 +884,25 @@ def start():
                 
                 # Take attendance if face detected consistently
                 if face_detected_frames >= required_frames:
-                    attendance_success = add_attendance(identified_person)
-                    if attendance_success:
-                        attendance_taken = True
-                        
-                        # Show success message on frame
-                        cv2.putText(frame, 'ATTENDANCE RECORDED!', (30, 60),
-                                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
-                        cv2.putText(frame, f'Welcome {identified_person.split("_")[0]}!', (30, 90),
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                    else:
-                        # Already marked attendance
-                        cv2.putText(frame, 'ALREADY MARKED TODAY!', (30, 60),
-                                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 165, 255), 3)
-                        cv2.putText(frame, f'Hi {identified_person.split("_")[0]}!', (30, 90),
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
-                        attendance_taken = True  # Stop camera even if already marked
+                    action_result = add_attendance(identified_person)
+                    attendance_taken = True
+                    res_type, res_user, res_time, res_extra = action_result
                     
+                    if res_type == 'checkin':
+                        cv2.putText(frame, 'CHECK-IN SUCCESS!', (30, 65),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+                        cv2.putText(frame, f'Welcome {res_user} ({res_extra})', (30, 100),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                    elif res_type == 'checkout':
+                        cv2.putText(frame, 'CHECK-OUT SUCCESS!', (30, 65),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 255), 3)
+                        cv2.putText(frame, f'Goodbye {res_user} - Stayed: {res_extra}', (30, 100),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 200, 255), 2)
+                    else:  # already_done
+                        cv2.putText(frame, 'ALREADY COMPLETED TODAY!', (30, 65),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 165, 255), 3)
+                        cv2.putText(frame, f'{res_user} already checked out', (30, 100),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
             else:
                 face_detected_frames = 0
                 last_identified_person = None
@@ -250,9 +922,8 @@ def start():
             
             # Check for ESC key or if attendance was taken
             key = cv2.waitKey(1) & 0xFF
-            if key == 27 or attendance_taken:  # ESC key or attendance taken
+            if key == 27 or attendance_taken:
                 if attendance_taken:
-                    # Show success message for a moment
                     cv2.waitKey(2000)  # Wait 2 seconds to show success message
                 break
                 
@@ -262,30 +933,25 @@ def start():
         cap.release()
         cv2.destroyAllWindows()
     
-    if attendance_taken and last_identified_person:
-        username = last_identified_person.split("_")[0]
-        # Check if it was a new attendance or already marked
-        df = pd.read_csv(os.path.join(ATTENDANCE_DIR, f'Attendance-{datetoday}.csv'))
-        userid = int(last_identified_person.split("_")[1])
-        if userid in list(df['Roll']):
-            # Check if this was just added (last entry)
-            if len(df) > 0 and df.iloc[-1]['Roll'] == userid:
-                flash(f'Attendance recorded successfully for {username}!', 'success')
-            else:
-                flash(f'Welcome back {username}! You have already marked attendance today.', 'info')
+    if attendance_taken and action_result:
+        res_type, res_user, res_time, res_extra = action_result
+        if res_type == 'checkin':
+            flash(f'Check-In recorded successfully for {res_user}! Status: {res_extra} at {res_time}', 'success')
+        elif res_type == 'checkout':
+            flash(f'Check-Out recorded successfully for {res_user}! Total Duration: {res_extra}', 'success')
         else:
-            flash(f'Attendance recorded successfully for {username}!', 'success')
+            flash(f'Hi {res_user}! You have already completed Check-In and Check-Out today.', 'info')
     else:
-        flash('No face detected or attendance recording failed. Please try again.', 'warning')
+        flash('No face detected or attendance recording timed out. Please try again.', 'warning')
     
     return redirect(url_for('home'))
 
-
-
 @app.route('/add', methods=['GET', 'POST'])
+@admin_required
 def add():
+    """Register new user with face images (Admin Only)."""
     if request.method == 'GET':
-        return render_template('add_user.html', datetoday2=datetoday2)
+        return render_template('add_user.html', datetoday2=get_datetoday2())
     
     newusername = request.form['newusername']
     newuserid = request.form['newuserid']

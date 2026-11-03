@@ -14,7 +14,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS from main template -->
+    <!-- Custom CSS -->
     <style>
         :root {
             --primary-color: #6C5CE7;
@@ -40,19 +40,63 @@
             font-family: 'Poppins', sans-serif;
             background: var(--background-gradient);
             min-height: 100vh;
+            color: #2d3436;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .navbar {
+            background: rgba(15, 23, 42, 0.95) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .navbar-brand {
+            color: #a29bfe !important;
+        }
+
+        body.dark-mode .nav-link {
+            color: #e2e8f0 !important;
+        }
+
+        body.dark-mode .main-card,
+        body.dark-mode .user-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .user-name-text {
+            color: #f8fafc;
+        }
+
+        body.dark-mode .form-control {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        body.dark-mode .modal-content {
+            background: #1e293b;
+            color: #f8fafc;
+            border-color: #334155;
         }
 
         .navbar {
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem 0;
+            padding: 0.85rem 0;
         }
 
         .navbar-brand {
             font-weight: 700;
             color: var(--primary-color) !important;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .main-card {
@@ -66,36 +110,35 @@
             overflow: hidden;
         }
 
-        .card-header {
+        .card-header-custom {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 1.5rem;
-            margin: -2rem -2rem 2rem -2rem;
+            padding: 1.25rem 1.5rem;
+            margin: -2rem -2rem 1.5rem -2rem;
             border-radius: 20px 20px 0 0;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 1rem;
-            position: relative;
-            z-index: 1;
         }
 
         .user-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             margin-bottom: 1rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
         }
 
         .user-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .user-avatar {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             display: flex;
@@ -103,17 +146,20 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
 
         .btn-custom {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.65rem 1.3rem;
             border-radius: 10px;
             font-weight: 500;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
         }
 
         .btn-custom:hover {
@@ -124,14 +170,41 @@
 
         .btn-danger-custom {
             background: linear-gradient(135deg, var(--danger-color), #ff6b7a);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
         .btn-danger-custom:hover {
             box-shadow: 0 8px 20px rgba(225, 112, 85, 0.3);
+            color: white;
+        }
+
+        .pill-btn {
+            cursor: pointer;
+            border: 1px solid rgba(108, 92, 231, 0.4);
+            border-radius: 20px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: white;
+            color: var(--primary-color);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .pill-btn:hover {
+            background: var(--primary-color);
+            color: white;
         }
     </style>
 
-    <title>Registered Users - Face Recognition Attendance</title>
+    <title>Registered Users - {{ org_name }}</title>
 </head>
 
 <body>
@@ -140,67 +213,109 @@
         <div class="container">
             <a class="navbar-brand" href="/">
                 <i class="fas fa-camera me-2"></i>
-                FaceAttend Pro
+                {{ org_name }}
             </a>
-            <div class="navbar-nav ms-auto">
+            <div class="navbar-nav ms-auto align-items-center gap-2">
+                <button class="pill-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon me-1" id="themeIcon"></i>
+                    <span id="themeText">Dark</span>
+                </button>
                 <a href="/" class="nav-link">
-                    <i class="fas fa-home me-2"></i>Home
+                    <i class="fas fa-home me-1"></i>Dashboard
                 </a>
-                <span class="navbar-text ms-3">
-                    <i class="fas fa-calendar-alt me-2"></i>{{ datetoday2 }}
+                <a href="/logout" class="pill-btn border-danger text-danger" title="Sign out as administrator">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+                <span class="badge bg-primary text-white p-2">
+                    <i class="fas fa-calendar-alt me-1"></i>{{ datetoday2 }}
                 </span>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="container" style="margin-top: 100px; padding-top: 1rem;">
+    <div class="container" style="margin-top: 90px; padding-top: 1rem;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-custom alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <div class="main-card">
-            <div class="card-header">
-                <i class="fas fa-users"></i>
-                <h3>Registered Users</h3>
-                <div class="ms-auto">
-                    <span class="badge bg-light text-dark">{{ l }} Users</span>
+            <div class="card-header-custom">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-users" style="font-size: 1.4rem;"></i>
+                    <h3 class="mb-0">Registered Users</h3>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-dark px-3 py-2 fw-bold">{{ l }} Total Enrolled</span>
                 </div>
             </div>
 
+            <!-- Live Search Filter for Users -->
             {% if l > 0 %}
-                <div class="row">
-                    {% for i in range(l) %}
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="user-card">
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar me-3">
-                                    {{ names[i][0].upper() }}
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-1">{{ names[i] }}</h5>
-                                    <p class="mb-1 text-muted">ID: {{ rolls[i] }}</p>
-                                    <small class="text-muted">
-                                        <i class="fas fa-folder me-1"></i>
-                                        {{ userlist[i] }}
-                                    </small>
-                                </div>
+            <div class="row mb-3">
+                <div class="col-md-6 ms-auto">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" id="userSearchInput" class="form-control" 
+                               placeholder="Search registered users by name or ID..." onkeyup="filterUserCards()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="userCardContainer">
+                {% for i in range(l) %}
+                <div class="col-md-6 col-lg-4 mb-3 user-item">
+                    <div class="user-card">
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-3">
+                                {{ names[i][0].upper() }}
                             </div>
-                            <div class="mt-3">
-                                <button class="btn btn-danger-custom btn-sm" 
-                                        onclick="confirmDelete('{{ userlist[i] }}', '{{ names[i] }}')">
-                                    <i class="fas fa-trash me-1"></i>
-                                    Delete
-                                </button>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1 fw-bold user-name-text">{{ names[i] }}</h5>
+                                <p class="mb-1 text-muted small">
+                                    <span class="badge bg-secondary user-id-text">ID: {{ rolls[i] }}</span>
+                                </p>
+                                <small class="text-muted d-block text-truncate" style="max-width: 170px;">
+                                    <i class="fas fa-folder me-1"></i>{{ userlist[i] }}
+                                </small>
                             </div>
                         </div>
+                        <div class="mt-3 d-flex justify-content-between align-items-center border-top pt-2">
+                            <!-- View History Button -->
+                            <a href="/user_profile/{{ rolls[i] }}" class="btn btn-sm btn-outline-primary" title="View individual attendance history">
+                                <i class="fas fa-chart-line me-1"></i> History
+                            </a>
+                            <!-- Delete User Button -->
+                            <button class="btn btn-danger-custom btn-sm" 
+                                    onclick="confirmDelete('{{ userlist[i] }}', '{{ names[i] }}')">
+                                <i class="fas fa-trash me-1"></i> Delete
+                            </button>
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
+            </div>
+
+            <div id="noMatchUsers" class="text-center py-4 text-muted d-none">
+                <i class="fas fa-search me-1"></i> No matching users found.
+            </div>
             {% else %}
                 <div class="text-center py-5">
-                    <i class="fas fa-user-plus" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <i class="fas fa-user-plus text-muted" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>
                     <h4 class="text-muted">No users registered yet</h4>
-                    <p class="text-muted">Add your first user to get started</p>
-                    <a href="/" class="btn btn-custom mt-3">
-                        <i class="fas fa-plus me-2"></i>
-                        Add First User
+                    <p class="text-muted">Register your first user to start recognizing faces</p>
+                    <a href="/" class="btn btn-custom mt-2">
+                        <i class="fas fa-plus me-1"></i> Add First User
                     </a>
                 </div>
             {% endif %}
@@ -208,7 +323,7 @@
             <div class="text-center mt-4">
                 <a href="/" class="btn btn-custom">
                     <i class="fas fa-arrow-left me-2"></i>
-                    Back to Home
+                    Back to Dashboard
                 </a>
             </div>
         </div>
@@ -219,16 +334,16 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
+                    <h5 class="modal-title">Confirm Deletion</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete user <strong id="deleteUserName"></strong>?</p>
-                    <p class="text-muted">This action cannot be undone and will remove all face data for this user.</p>
+                    <p>Are you sure you want to delete <strong id="deleteUserName"></strong>?</p>
+                    <p class="text-danger small mb-0">This will permanently remove the facial images and retrain the recognition model.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete User</a>
+                    <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Confirm Delete</a>
                 </div>
             </div>
         </div>
@@ -238,12 +353,54 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Theme Toggle (Dark/Light mode)
+        const currentTheme = localStorage.getItem('faceattend_theme') || 'light';
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeIcon').className = 'fas fa-sun me-1 text-warning';
+            document.getElementById('themeText').textContent = 'Light';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('faceattend_theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-sun me-1 text-warning' : 'fas fa-moon me-1';
+            document.getElementById('themeText').textContent = isDark ? 'Light' : 'Dark';
+        }
+
         function confirmDelete(username, displayName) {
             document.getElementById('deleteUserName').textContent = displayName;
-            document.getElementById('confirmDeleteBtn').href = '/delete_user/' + username;
-            
+            document.getElementById('confirmDeleteBtn').href = '/delete_user/' + encodeURIComponent(username);
             const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
+        }
+
+        // Live Search Filter for Registered Users
+        function filterUserCards() {
+            const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('#userCardContainer .user-item');
+            let matchCount = 0;
+
+            cards.forEach(card => {
+                const name = card.querySelector('.user-name-text')?.textContent.toLowerCase() || '';
+                const id = card.querySelector('.user-id-text')?.textContent.toLowerCase() || '';
+                if (name.includes(query) || id.includes(query)) {
+                    card.style.display = '';
+                    matchCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const noMatch = document.getElementById('noMatchUsers');
+            if (noMatch) {
+                if (matchCount === 0 && cards.length > 0) {
+                    noMatch.classList.remove('d-none');
+                } else {
+                    noMatch.classList.add('d-none');
+                }
+            }
         }
     </script>
 </body>

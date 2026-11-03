@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6C5CE7;
+            --secondary-color: #A29BFE;
+            --accent-color: #FD79A8;
+            --success-color: #00B894;
+            --warning-color: #FDCB6E;
+            --danger-color: #E17055;
+            --dark-color: #2D3436;
+            --light-color: #DDD6FE;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            margin: -2rem -2rem 2rem -2rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .form-control-custom {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.15);
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+            color: white;
+        }
+    </style>
+
+    <title>Add User - Face Recognition Attendance</title>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-camera me-2"></i>
+                FaceAttend Pro
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home me-2"></i>Home
+                </a>
+                <a href="/users" class="nav-link">
+                    <i class="fas fa-users me-2"></i>Users
+                </a>
+                <span class="navbar-text ms-3">
+                    <i class="fas fa-calendar-alt me-2"></i>{{ datetoday2 }}
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 100px; padding-top: 1rem;">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="main-card">
+                    <div class="card-header-custom">
+                        <i class="fas fa-user-plus fa-2x"></i>
+                        <div>
+                            <h3 class="mb-0">Add New User</h3>
+                            <small class="opacity-75">Register face data for attendance tracking</small>
+                        </div>
+                    </div>
+                    
+                    <form action='/add' method="POST" enctype="multipart/form-data" id="addUserForm">
+                        <div class="mb-3">
+                            <label class="form-label form-label-custom">
+                                <i class="fas fa-user me-2"></i>Full Name
+                            </label>
+                            <input type="text" class="form-control form-control-custom" id="newusername" name='newusername' 
+                                   placeholder="Enter full name" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label form-label-custom">
+                                <i class="fas fa-id-badge me-2"></i>User ID / Roll Number
+                            </label>
+                            <input type="number" class="form-control form-control-custom" id="newuserid" name='newuserid' 
+                                   placeholder="Enter unique ID (numbers only)" required>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                            <i class="fas fa-video fa-2x me-3"></i>
+                            <div>
+                                <strong>Camera capture note:</strong> Clicking Register will open your webcam to capture face samples. Look directly at the camera.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type='submit' class='btn btn-custom btn-lg' id="addUserBtn">
+                                <i class="fas fa-camera me-2"></i>
+                                Start Registration & Capture Faces
+                            </button>
+                            <a href="/" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

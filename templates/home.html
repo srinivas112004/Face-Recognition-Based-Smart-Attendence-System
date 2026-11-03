@@ -9,11 +9,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Material Icons -->
+    <!-- Material Icons & Font Awesome -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts -->
@@ -47,6 +45,69 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark Mode Styling */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .navbar {
+            background: rgba(15, 23, 42, 0.95) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .navbar-brand {
+            color: #a29bfe !important;
+        }
+
+        body.dark-mode .nav-link {
+            color: #e2e8f0 !important;
+        }
+
+        body.dark-mode .main-card,
+        body.dark-mode .stats-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .toolbar-panel {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        body.dark-mode .table-custom {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        body.dark-mode .table-custom tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-mode .stats-label {
+            color: #cbd5e1;
+        }
+
+        body.dark-mode .form-control-custom,
+        body.dark-mode .form-control {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        body.dark-mode .nav-pills-custom .nav-link {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        body.dark-mode .modal-content {
+            background: #1e293b;
+            color: #f8fafc;
+            border-color: #334155;
         }
 
         body::before {
@@ -71,33 +132,33 @@
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem 0;
+            padding: 0.8rem 0;
             z-index: 1030;
         }
 
         .navbar-brand {
             font-weight: 700;
             color: var(--primary-color) !important;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .hero-section {
-            padding: 6rem 0 2rem; /* Increased top padding to account for fixed navbar */
+            padding: 5.5rem 0 1.5rem;
             text-align: center;
             color: white;
         }
 
         .hero-title {
-            font-size: 3.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             animation: slideInDown 1s ease-out;
         }
 
         .hero-subtitle {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
             opacity: 0.9;
             animation: slideInUp 1s ease-out 0.3s both;
         }
@@ -115,27 +176,33 @@
         .stats-card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             margin-bottom: 1rem;
             box-shadow: var(--card-shadow);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: fadeInUp 1s ease-out 0.6s both;
+            animation: fadeInUp 0.8s ease-out both;
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
         }
 
         .stats-number {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: var(--primary-color);
         }
 
         .stats-label {
             color: var(--dark-color);
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .main-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.96);
             border-radius: 20px;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -143,88 +210,80 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
-            animation: fadeInUp 1s ease-out 0.9s both;
-            overflow: hidden; /* Ensure header doesn't overflow */
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            overflow: hidden;
         }
 
         .main-card:hover {
-            transform: translateY(-5px); /* Reduced hover effect */
             box-shadow: var(--hover-shadow);
         }
 
-        .card-header {
+        .card-header-custom {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 1.5rem;
-            margin: -2rem -2rem 2rem -2rem;
+            padding: 1.25rem 1.5rem;
+            margin: -2rem -2rem 1.5rem -2rem;
             border-radius: 20px 20px 0 0;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
             gap: 1rem;
-            position: relative;
-            z-index: 1;
         }
 
-        .card-header h3 {
+        .card-header-custom h3 {
             margin: 0;
             font-weight: 600;
-        }
-
-        .card-header i {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .btn-custom {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
             color: white;
-            padding: 1rem 2rem;
-            border-radius: 15px;
+            padding: 0.85rem 1.8rem;
+            border-radius: 14px;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-custom::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn-custom:hover::before {
-            left: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-custom:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             box-shadow: 0 12px 25px rgba(108, 92, 231, 0.4);
             color: white;
         }
 
         .btn-danger-custom {
             background: linear-gradient(135deg, var(--danger-color), #ff6b7a);
+            border: none;
+            color: white;
             box-shadow: 0 8px 20px rgba(225, 112, 85, 0.3);
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .btn-danger-custom:hover {
             box-shadow: 0 12px 25px rgba(225, 112, 85, 0.4);
+            color: white;
+            transform: translateY(-2px);
         }
 
         .form-control-custom {
             border: 2px solid rgba(108, 92, 231, 0.2);
-            border-radius: 15px;
-            padding: 1rem;
-            font-size: 1rem;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .form-control-custom:focus {
@@ -233,17 +292,12 @@
             background: white;
         }
 
-        .form-label-custom {
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 0.5rem;
-        }
-
         .table-custom {
             background: white;
-            border-radius: 15px;
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            font-size: 0.92rem;
         }
 
         .table-custom thead {
@@ -253,39 +307,152 @@
 
         .table-custom thead th {
             border: none;
-            padding: 1rem;
+            padding: 0.85rem 1rem;
             font-weight: 600;
+            vertical-align: middle;
         }
 
         .table-custom tbody td {
-            padding: 1rem;
+            padding: 0.85rem 1rem;
             border-color: rgba(0, 0, 0, 0.05);
             vertical-align: middle;
         }
 
         .table-custom tbody tr:hover {
-            background-color: rgba(108, 92, 231, 0.05);
+            background-color: rgba(108, 92, 231, 0.04);
         }
 
         .alert-custom {
             border: none;
-            border-radius: 15px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
+            border-radius: 14px;
+            padding: 1rem 1.4rem;
+            margin-bottom: 1.5rem;
             font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             animation: shake 0.5s ease-in-out;
         }
 
         @keyframes shake {
-            0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
 
-        .badge-custom {
-            background: linear-gradient(135deg, var(--success-color), #55efc4);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
+        .status-badge-ontime {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            color: #0d3d2e;
             font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-badge-late {
+            background: linear-gradient(135deg, #fdcb6e, #ffeaa7);
+            color: #634a00;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-badge-absent {
+            background: linear-gradient(135deg, #ff7675, #fab1a0);
+            color: #5c0f0f;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-badge-manual {
+            background: linear-gradient(135deg, #55efc4, #81ecec);
+            color: #0c4a3e;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-badge-leave {
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            color: #102e52;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .nav-pills-custom .nav-link {
+            border-radius: 12px;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            background: #f1f2f6;
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills-custom .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+        }
+
+        .toolbar-panel {
+            background: #f8f9fd;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .user-avatar-mini {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .pill-btn {
+            cursor: pointer;
+            border: 1px solid rgba(108, 92, 231, 0.4);
+            border-radius: 20px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: white;
+            color: var(--primary-color);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .pill-btn:hover {
+            background: var(--primary-color);
+            color: white;
         }
 
         .loading-spinner {
@@ -293,78 +460,87 @@
             margin: 1rem auto;
         }
 
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .hero-section {
-                padding: 5rem 0 2rem; /* Adjusted for mobile */
-            }
-            
-            .main-card {
-                margin-bottom: 1rem;
-                border-radius: 15px;
-            }
-            
-            .card-header {
-                border-radius: 15px 15px 0 0;
-            }
-            
-            .btn-custom {
-                width: 100%;
-                margin-bottom: 1rem;
-            }
-        }
-
         .footer {
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.15);
             color: white;
             text-align: center;
-            padding: 2rem 0;
-            margin-top: 3rem;
+            padding: 1.8rem 0;
+            margin-top: 2rem;
         }
     </style>
 
-    <title>Face Recognition Attendance System</title>
+    <title>{{ org_name }} - Smart Attendance</title>
 </head>
 
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/">
                 <i class="fas fa-camera me-2"></i>
-                FaceAttend Pro
+                {{ org_name }}
             </a>
-            <div class="navbar-nav ms-auto">
-                <a href="/users" class="nav-link me-3">
-                    <i class="fas fa-users me-2"></i>Manage Users
-                </a>
-                <span class="navbar-text">
-                    <i class="fas fa-calendar-alt me-2"></i>{{ datetoday2 }}
-                </span>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="navbar-nav ms-auto align-items-center gap-2">
+                    <!-- Dark Mode Toggle Button -->
+                    <button class="pill-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                        <i class="fas fa-moon me-1" id="themeIcon"></i>
+                        <span id="themeText">Dark</span>
+                    </button>
+
+                    <!-- Voice Feedback Toggle -->
+                    <button class="pill-btn" id="voiceToggleBtn" onclick="toggleVoice()" title="Toggle voice greeting">
+                        <i class="fas fa-volume-up me-1" id="voiceIcon"></i>
+                        <span id="voiceStatusText">Voice: ON</span>
+                    </button>
+
+                    <!-- Authentication / Role Controls -->
+                    {% if is_logged_in %}
+                        {% if user_role == 'admin' %}
+                            <button class="pill-btn" data-bs-toggle="modal" data-bs-target="#settingsModal" title="System Settings">
+                                <i class="fas fa-cog me-1"></i>Settings
+                            </button>
+                            
+                            <a href="/users" class="nav-link">
+                                <i class="fas fa-users me-1"></i>Manage Users
+                            </a>
+
+                            <a href="/logout" class="pill-btn border-danger text-danger" title="Sign out as administrator">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout (Admin)
+                            </a>
+                        {% else %}
+                            <a href="/my_attendance" class="pill-btn text-primary" title="View my personal attendance record">
+                                <i class="fas fa-user-graduate me-1"></i>My Attendance ({{ user_name }})
+                            </a>
+
+                            <a href="/logout" class="pill-btn border-danger text-danger" title="Sign out">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="/login" class="pill-btn border-primary text-primary" title="Sign in as Admin or Student">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                    {% endif %}
+                    
+                    <span class="badge bg-light text-dark p-2 border">
+                        <i class="fas fa-clock me-1 text-primary"></i>Cutoff: {{ cutoff_time }}
+                    </span>
+                    
+                    <span class="badge bg-primary text-white p-2">
+                        <i class="fas fa-calendar-alt me-1"></i>{{ datetoday2 }}
+                    </span>
+                </div>
             </div>
         </div>
     </nav>
@@ -373,37 +549,48 @@
     <div class="hero-section">
         <div class="container">
             <h1 class="hero-title">
-                <i class="fas fa-user-check me-3"></i>
-                Face Recognition Attendance
+                <i class="fas fa-user-check me-2"></i>
+                Smart Face Attendance
             </h1>
             <p class="hero-subtitle">
-                Modern, secure, and efficient attendance tracking powered by AI
+                Automated Check-In, Check-Out, and Real-Time Attendance Management
             </p>
             
             <!-- Stats Cards -->
-            <div class="row justify-content-center mt-4">
-                <div class="col-md-3 col-sm-6">
+            <div class="row justify-content-center g-3 mt-1">
+                <div class="col-lg-3 col-sm-6">
                     <div class="stats-card text-center">
                         <div class="stats-number">{{ totalreg }}</div>
-                        <div class="stats-label">Registered Users</div>
+                        <div class="stats-label"><i class="fas fa-id-card me-1 text-primary"></i>Registered Users</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
+                <div class="col-lg-3 col-sm-6">
                     <div class="stats-card text-center">
-                        <div class="stats-number">{{ l }}</div>
-                        <div class="stats-label">Present Today</div>
+                        <div class="stats-number text-success">{{ l }}</div>
+                        <div class="stats-label">
+                            <i class="fas fa-check-circle me-1 text-success"></i>Present Today
+                            <small class="d-block text-muted" style="font-size: 0.78rem;">
+                                {{ on_time_count }} On-Time | {{ late_count }} Late
+                            </small>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
+                <div class="col-lg-3 col-sm-6">
                     <div class="stats-card text-center">
-                        <div class="stats-number">
+                        <div class="stats-number text-danger">{{ absent_count }}</div>
+                        <div class="stats-label"><i class="fas fa-user-times me-1 text-danger"></i>Absent Today</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stats-card text-center">
+                        <div class="stats-number text-info">
                             {% if totalreg > 0 %}
                                 {{ "%.1f"|format((l / totalreg) * 100) }}%
                             {% else %}
                                 0%
                             {% endif %}
                         </div>
-                        <div class="stats-label">Attendance Rate</div>
+                        <div class="stats-label"><i class="fas fa-chart-pie me-1 text-info"></i>Attendance Rate</div>
                     </div>
                 </div>
             </div>
@@ -413,40 +600,81 @@
     <!-- Alert Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="container">
+            <div class="container" id="flashContainer">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-custom" role="alert">
-                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
-                        {{ message }}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-custom alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'bell' }} me-2"></i>
+                        <span class="flash-text">{{ message }}</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
 
-    {% if mess %}
-    <div class="container">
-        <div class="alert alert-danger alert-custom" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            {{ mess }}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Main Content -->
-    <div class="container" style="margin-top: 0; padding-top: 1rem;">
+    <!-- Main Content Grid -->
+    <div class="container" style="padding-top: 0.5rem;">
         <div class="row">
-            <!-- Attendance Section -->
+            <!-- Left / Attendance Table Column (8 Cols) -->
             <div class="col-lg-8 mb-4">
                 <div class="main-card">
-                    <div class="card-header">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h3>Today's Attendance</h3>
-                        <div class="ms-auto">
-                            <span class="badge badge-custom">{{ l }} Present</span>
+                    <div class="card-header-custom">
+                        <h3>
+                            <i class="fas fa-clipboard-check"></i>
+                            Attendance Records
+                        </h3>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Download / Export CSV Button -->
+                            <a href="/download?date={{ selected_date_iso }}" class="btn btn-sm btn-light text-primary fw-bold shadow-sm" title="Download CSV for this date">
+                                <i class="fas fa-download me-1"></i> Export CSV
+                            </a>
+                            <!-- Reset Records Button (Admin only) -->
+                            {% if is_logged_in %}
+                            <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#resetModal" title="Reset records for this date">
+                                <i class="fas fa-redo-alt me-1"></i> Reset
+                            </button>
+                            {% endif %}
+                            <span class="badge bg-light text-dark fw-bold px-3 py-2">
+                                {{ l }} Marked
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Historical Date Picker & Search Toolbar -->
+                    <div class="toolbar-panel">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-7">
+                                <form method="GET" action="/" class="d-flex align-items-center gap-2 flex-wrap">
+                                    <label class="form-label mb-0 fw-semibold text-muted small">
+                                        <i class="fas fa-calendar me-1"></i>Date:
+                                    </label>
+                                    <input type="date" name="date" class="form-control form-control-sm" style="max-width: 170px;" value="{{ selected_date_iso }}">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-filter me-1"></i>View
+                                    </button>
+                                    {% if not is_today %}
+                                    <a href="/" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-undo me-1"></i>Go to Today
+                                    </a>
+                                    {% endif %}
+                                </form>
+                            </div>
+                            
+                            <!-- Live Search Input -->
+                            <div class="col-md-5">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" id="attendanceSearchInput" class="form-control border-start-0" 
+                                           placeholder="Search by name or ID..." onkeyup="filterAttendanceTable()">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
+                    <!-- Camera Start Action Button -->
+                    {% if is_today %}
                     <div class="text-center mb-4">
                         <a href="/start" class="text-decoration-none">
                             <button class="btn btn-custom btn-lg" id="startAttendanceBtn">
@@ -457,82 +685,232 @@
                         <div class="mt-2">
                             <small class="text-muted">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Camera will automatically stop after detecting a face or press ESC to exit
+                                <strong>Scan 1:</strong> Check-In (On-Time / Late) | <strong>Scan 2:</strong> Check-Out (calculates duration)
                             </small>
                         </div>
                     </div>
-
-                    {% if l > 0 %}
-                    <div class="table-responsive">
-                        <table class="table table-custom">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-hashtag me-2"></i>S.No</th>
-                                    <th><i class="fas fa-user me-2"></i>Name</th>
-                                    <th><i class="fas fa-id-card me-2"></i>ID</th>
-                                    <th><i class="fas fa-clock me-2"></i>Check-in Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for i in range(l) %}
-                                <tr>
-                                    <td>{{ i+1 }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px;">
-                                                <i class="fas fa-user text-white"></i>
-                                            </div>
-                                            {{ names[i] }}
-                                        </div>
-                                    </td>
-                                    <td><span class="badge bg-secondary">{{ rolls[i] }}</span></td>
-                                    <td>
-                                        <i class="fas fa-check-circle text-success me-2"></i>
-                                        {{ times[i] }}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
                     {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-users feature-icon"></i>
-                        <h4 class="text-muted">No attendance recorded yet</h4>
-                        <p class="text-muted">Click "Start Attendance Capture" to begin recording attendance</p>
+                    <div class="alert alert-info py-2 small mb-4">
+                        <i class="fas fa-history me-1"></i>
+                        Viewing historical records for <strong>{{ datetoday2 }}</strong>. Switch to <strong>Today</strong> to start live camera scanning.
                     </div>
                     {% endif %}
+
+                    <!-- Navigation Tabs for Present vs Absent -->
+                    <ul class="nav nav-pills nav-pills-custom mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pills-present-tab" data-bs-toggle="pill" data-bs-target="#pills-present" type="button" role="tab">
+                                <i class="fas fa-user-check me-1 text-success"></i>Present Users ({{ l }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pills-absent-tab" data-bs-toggle="pill" data-bs-target="#pills-absent" type="button" role="tab">
+                                <i class="fas fa-user-times me-1 text-danger"></i>Absent Users ({{ absent_count }})
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="pills-tabContent">
+                        <!-- Present Tab -->
+                        <div class="tab-pane fade show active" id="pills-present" role="tabpanel">
+                            {% if l > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-custom align-middle" id="attendanceTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th><i class="fas fa-user me-1"></i>Name</th>
+                                            <th><i class="fas fa-id-badge me-1"></i>ID</th>
+                                            <th><i class="fas fa-sign-in-alt me-1"></i>Check-In</th>
+                                            <th><i class="fas fa-sign-out-alt me-1"></i>Check-Out</th>
+                                            <th><i class="fas fa-hourglass-half me-1"></i>Duration</th>
+                                            <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for i in range(l) %}
+                                        <tr class="attendance-row">
+                                            <td>{{ i+1 }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="user-avatar-mini me-2">
+                                                        {{ names[i][0].upper() }}
+                                                    </div>
+                                                    <a href="/user_profile/{{ rolls[i] }}" class="text-decoration-none fw-bold student-name" title="Click to view full attendance history">
+                                                        {{ names[i] }}
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary student-id">{{ rolls[i] }}</span>
+                                            </td>
+                                            <td>
+                                                {% if times[i] != '-' and times[i] != '' %}
+                                                    <span class="text-success fw-semibold">
+                                                        <i class="fas fa-clock me-1"></i>{{ times[i] }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if checkouts[i] != '-' and checkouts[i] != '' %}
+                                                    <span class="text-danger fw-semibold">
+                                                        <i class="fas fa-door-open me-1"></i>{{ checkouts[i] }}
+                                                    </span>
+                                                {% elif statuses[i] in ['On Time', 'Late', 'Present (Manual)'] %}
+                                                    <span class="badge bg-light text-muted border">In Session</span>
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if durations[i] != '-' and durations[i] != '' %}
+                                                    <span class="badge bg-info text-dark">{{ durations[i] }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if statuses[i] == 'On Time' %}
+                                                    <span class="status-badge-ontime"><i class="fas fa-check-circle"></i> On Time</span>
+                                                {% elif statuses[i] == 'Late' %}
+                                                    <span class="status-badge-late"><i class="fas fa-clock"></i> Late</span>
+                                                {% elif 'Manual' in statuses[i] %}
+                                                    <span class="status-badge-manual"><i class="fas fa-user-edit"></i> {{ statuses[i] }}</span>
+                                                {% elif statuses[i] == 'On Leave' %}
+                                                    <span class="status-badge-leave"><i class="fas fa-calendar-minus"></i> On Leave</span>
+                                                {% else %}
+                                                    <span class="status-badge-absent"><i class="fas fa-times-circle"></i> Absent</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="noMatchAttendance" class="text-center py-4 text-muted d-none">
+                                <i class="fas fa-search me-1"></i> No matching attendees found.
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-users-slash text-muted" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>
+                                <h4 class="text-muted">No attendance recorded for this date</h4>
+                                <p class="text-muted">Click "Start Attendance Capture" or use Manual Override to mark attendance.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Absent Tab -->
+                        <div class="tab-pane fade" id="pills-absent" role="tabpanel">
+                            {% if absent_count > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-custom align-middle" id="absentTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th><i class="fas fa-user me-1"></i>Name</th>
+                                            <th><i class="fas fa-id-badge me-1"></i>ID</th>
+                                            <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                            <th><i class="fas fa-tools me-1"></i>Manual Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ab in absent_list %}
+                                        <tr class="absent-row">
+                                            <td>{{ loop.index }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="user-avatar-mini me-2 bg-danger" style="background: linear-gradient(135deg, #e17055, #ff7675);">
+                                                        {{ ab.name[0].upper() }}
+                                                    </div>
+                                                    <a href="/user_profile/{{ ab.roll }}" class="text-decoration-none fw-bold absent-name text-dark">
+                                                        {{ ab.name }}
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary absent-id">{{ ab.roll }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge-absent">
+                                                    <i class="fas fa-times-circle"></i> Absent
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if is_logged_in %}
+                                                <div class="d-flex gap-1">
+                                                    <form action="/mark_manual" method="POST" class="d-inline">
+                                                        <input type="hidden" name="roll" value="{{ ab.roll }}">
+                                                        <input type="hidden" name="date" value="{{ selected_date_iso }}">
+                                                        <input type="hidden" name="status" value="Present (Manual)">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark Present manually">
+                                                            <i class="fas fa-check me-1"></i>Present
+                                                        </button>
+                                                    </form>
+                                                    <form action="/mark_manual" method="POST" class="d-inline">
+                                                        <input type="hidden" name="roll" value="{{ ab.roll }}">
+                                                        <input type="hidden" name="date" value="{{ selected_date_iso }}">
+                                                        <input type="hidden" name="status" value="On Leave">
+                                                        <button type="submit" class="btn btn-sm btn-outline-info" title="Mark On Leave">
+                                                            <i class="fas fa-calendar-minus me-1"></i>Leave
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                {% else %}
+                                                <a href="/login?next=/" class="badge bg-light text-muted border text-decoration-none py-2 px-2">
+                                                    <i class="fas fa-lock me-1"></i>Login to Mark
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-award text-success" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>
+                                <h4 class="text-success">100% Attendance!</h4>
+                                <p class="text-muted">All registered users have marked attendance today.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Add User Section -->
+            <!-- Right Column: Add New User Form / Lock Card -->
             <div class="col-lg-4 mb-4">
                 <div class="main-card">
-                    <div class="card-header">
-                        <i class="fas fa-user-plus"></i>
-                        <h3>Add New User</h3>
+                    <div class="card-header-custom">
+                        <h3>
+                            <i class="fas fa-user-plus"></i>
+                            Add New User
+                        </h3>
                     </div>
                     
+                    {% if is_logged_in %}
                     <form action='/add' method="POST" enctype="multipart/form-data" id="addUserForm">
                         <div class="mb-3">
-                            <label class="form-label form-label-custom">
-                                <i class="fas fa-user me-2"></i>Full Name
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-user me-2 text-primary"></i>Full Name
                             </label>
                             <input type="text" class="form-control form-control-custom" id="newusername" name='newusername' 
-                                   placeholder="Enter full name" required>
+                                   placeholder="e.g. Alice Smith" required>
                         </div>
                         
                         <div class="mb-4">
-                            <label class="form-label form-label-custom">
-                                <i class="fas fa-id-badge me-2"></i>User ID
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-id-badge me-2 text-primary"></i>User ID / Roll No
                             </label>
                             <input type="number" class="form-control form-control-custom" id="newuserid" name='newuserid' 
-                                   placeholder="Enter unique ID" required>
+                                   placeholder="e.g. 101" required>
                         </div>
                         
                         <div class="d-grid">
-                            <button type='submit' class='btn btn-danger-custom btn-lg' id="addUserBtn">
-                                <i class="fas fa-plus me-2"></i>
+                            <button type='submit' class='btn btn-danger-custom btn-lg py-3' id="addUserBtn">
+                                <i class="fas fa-user-plus me-2"></i>
                                 Register New User
                             </button>
                         </div>
@@ -543,16 +921,33 @@
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
-                            <p class="text-center mt-2">Capturing face data...</p>
+                            <p class="text-center mt-2 small text-muted">Capturing 10 facial samples via webcam...</p>
                         </div>
                     </form>
+                    {% else %}
+                    <!-- Locked Admin State for Adding Users -->
+                    <div class="text-center py-4">
+                        <div class="mb-3 text-muted">
+                            <i class="fas fa-user-lock fa-3x text-primary" style="opacity: 0.8;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Admin Login Required</h5>
+                        <p class="text-muted small mb-3">
+                            Enrolling new faces and training the recognition model is restricted to administrators.
+                        </p>
+                        <a href="/login?next=/" class="btn btn-custom w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In as Admin
+                        </a>
+                    </div>
+                    {% endif %}
                     
-                    <div class="mt-4 p-3 bg-light rounded-3">
+                    <div class="mt-4 p-3 bg-light rounded-3 border">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-database feature-icon me-3" style="font-size: 2rem;"></i>
+                            <div class="user-avatar-mini me-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                <i class="fas fa-database"></i>
+                            </div>
                             <div>
-                                <h5 class="mb-1">Database Status</h5>
-                                <p class="mb-0 text-muted">{{ totalreg }} users registered</p>
+                                <h6 class="mb-0 fw-bold">System Status</h6>
+                                <small class="text-muted">{{ totalreg }} users enrolled in model</small>
                             </div>
                         </div>
                     </div>
@@ -561,74 +956,200 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <div class="container">
-            <p>&copy; 2025 Face Recognition Attendance System. Built with ❤️ using Flask & OpenCV</p>
+    <!-- Settings Modal (Admin Only) -->
+    {% if is_logged_in %}
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/settings" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-cog me-2 text-primary"></i>System Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Organization / College Name</label>
+                            <input type="text" name="org_name" class="form-control" value="{{ org_name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Late Arrival Cutoff Time (HH:MM:SS)</label>
+                            <input type="text" name="cutoff_time" class="form-control" value="{{ cutoff_time }}" placeholder="09:30:00" required>
+                            <small class="text-muted">Attendance recorded after this time is tagged as "Late".</small>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="fas fa-key me-1 text-primary"></i>Change Admin Password</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Leave blank to keep current password">
+                            <small class="text-muted">Enter a new password only if you wish to change it.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Reset Confirmation Modal -->
+    <div class="modal fade" id="resetModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/reset_attendance" method="POST">
+                    <input type="hidden" name="date" value="{{ selected_date_iso }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Reset Attendance</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to clear all attendance records for <strong>{{ datetoday2 }}</strong>?</p>
+                        <p class="text-danger small mb-0">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Yes, Reset Records</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <p class="mb-0 small">&copy; {{ org_name }} | Smart Face Recognition Attendance System</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom JavaScript -->
+    <!-- Custom Application Logic (Voice Feedback, Instant Search, Dark Mode) -->
     <script>
-        // Form submission handling
-        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+        // Theme Toggle (Dark/Light mode)
+        const currentTheme = localStorage.getItem('faceattend_theme') || 'light';
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeIcon').className = 'fas fa-sun me-1 text-warning';
+            document.getElementById('themeText').textContent = 'Light';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('faceattend_theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-sun me-1 text-warning' : 'fas fa-moon me-1';
+            document.getElementById('themeText').textContent = isDark ? 'Light' : 'Dark';
+        }
+
+        // Voice Feedback & Synthesizer Chime
+        let voiceEnabled = localStorage.getItem('faceattend_voice') !== 'false';
+        updateVoiceButtonUI();
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            localStorage.setItem('faceattend_voice', voiceEnabled);
+            updateVoiceButtonUI();
+            if (voiceEnabled) {
+                speakMessage("Voice feedback is enabled.");
+            }
+        }
+
+        function updateVoiceButtonUI() {
+            const btn = document.getElementById('voiceToggleBtn');
+            const icon = document.getElementById('voiceIcon');
+            const text = document.getElementById('voiceStatusText');
+            if (voiceEnabled) {
+                icon.className = 'fas fa-volume-up me-1 text-success';
+                text.textContent = 'Voice: ON';
+                btn.style.borderColor = 'rgba(0, 184, 148, 0.6)';
+            } else {
+                icon.className = 'fas fa-volume-mute me-1 text-danger';
+                text.textContent = 'Voice: OFF';
+                btn.style.borderColor = 'rgba(225, 112, 85, 0.6)';
+            }
+        }
+
+        function playChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, now);
+                osc.frequency.setValueAtTime(880, now + 0.12);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.36);
+            } catch (err) {
+                console.log("AudioContext chime not available:", err);
+            }
+        }
+
+        function speakMessage(text) {
+            if (!voiceEnabled || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.05;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const flashElements = document.querySelectorAll('.flash-text');
+            if (flashElements.length > 0) {
+                const msg = flashElements[0].textContent.trim();
+                playChime();
+                setTimeout(() => {
+                    speakMessage(msg);
+                }, 400);
+            }
+        });
+
+        // Live Search Filter for Tables
+        function filterAttendanceTable() {
+            const query = document.getElementById('attendanceSearchInput').value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#attendanceTable tbody tr.attendance-row');
+            let matchCount = 0;
+
+            rows.forEach(row => {
+                const name = row.querySelector('.student-name')?.textContent.toLowerCase() || '';
+                const id = row.querySelector('.student-id')?.textContent.toLowerCase() || '';
+                if (name.includes(query) || id.includes(query)) {
+                    row.style.display = '';
+                    matchCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const noMatchMsg = document.getElementById('noMatchAttendance');
+            if (noMatchMsg) {
+                if (matchCount === 0 && rows.length > 0) {
+                    noMatchMsg.classList.remove('d-none');
+                } else {
+                    noMatchMsg.classList.add('d-none');
+                }
+            }
+        }
+
+        document.getElementById('addUserForm')?.addEventListener('submit', function() {
             const btn = document.getElementById('addUserBtn');
             const spinner = document.getElementById('loadingSpinner');
-            
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Capturing Photos...';
             spinner.style.display = 'block';
         });
 
-        // Input validation
-        document.getElementById('newuserid').addEventListener('input', function(e) {
-            const value = e.target.value;
-            if (value < 0) {
-                e.target.value = '';
-            }
-        });
-
-        // Smooth scrolling for internal links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Auto-refresh attendance data every 30 seconds
-        setInterval(function() {
-            // Only refresh if we're on the main page and not in the middle of adding a user
-            if (!document.getElementById('addUserBtn').disabled) {
-                location.reload();
-            }
-        }, 30000);
-
-        // Add some interactive feedback
-        document.querySelectorAll('.btn-custom').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
-
-        // Handle attendance button click with loading state
-        document.getElementById('startAttendanceBtn').addEventListener('click', function(e) {
-            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Starting Camera...';
+        document.getElementById('startAttendanceBtn')?.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Opening Camera...';
             this.disabled = true;
-            
-            // Re-enable after 3 seconds in case of error
             setTimeout(() => {
                 this.innerHTML = '<i class="fas fa-camera me-2"></i>Start Attendance Capture';
                 this.disabled = false;
