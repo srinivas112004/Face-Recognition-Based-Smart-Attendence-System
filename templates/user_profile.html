@@ -363,6 +363,11 @@
                         <i class="fas fa-camera me-1"></i>Scan Attendance
                     </a>
                     {% if user_role == 'admin' %}
+                    <form method="POST" action="/delete_user/{{ user_roll }}" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete {{ user_name }} (Roll: {{ user_roll }})? This action cannot be undone.');">
+                        <button type="submit" class="btn btn-sm btn-danger shadow-sm">
+                            <i class="fas fa-trash me-1"></i>Delete User
+                        </button>
+                    </form>
                     <a href="/users" class="btn btn-sm btn-outline-light">
                         <i class="fas fa-arrow-left me-1"></i>All Users
                     </a>

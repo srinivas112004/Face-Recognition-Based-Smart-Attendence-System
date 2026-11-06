@@ -1,5 +1,8 @@
 import cv2
 import os
+import shutil
+import stat
+import time
 from flask import Flask, request, render_template, jsonify, flash, redirect, url_for, send_file, session
 from datetime import date, datetime
 import numpy as np
@@ -802,25 +805,143 @@ def list_users():
         cutoff_time=cfg.get('cutoff_time', '09:30:00')
     )
 
-@app.route('/delete_user/<username>')
+def safe_remove_directory(folder_path):
+    """
+    Safely delete a directory on Windows/OneDrive.
+    Handles read-only attributes, permission issues, and OneDrive locks with retries.
+    """
+    if not os.path.exists(folder_path):
+        return True
+
+    def on_error(func, path, exc_info):
+        try:
+            os.chmod(path, stat.S_IWRITE | stat.S_IWUSR)
+            func(path)
+        except Exception:
+            pass
+
+    for attempt in range(4):
+        try:
+            # Change permissions on all files and subdirectories
+            for root, dirs, files in os.walk(folder_path):
+                for f in files:
+                    try:
+                        os.chmod(os.path.join(root, f), stat.S_IWRITE | stat.S_IWUSR)
+                    except Exception:
+                        pass
+                for d in dirs:
+                    try:
+                        os.chmod(os.path.join(root, d), stat.S_IWRITE | stat.S_IWUSR)
+                    except Exception:
+                        pass
+            shutil.rmtree(folder_path, onerror=on_error)
+            if not os.path.exists(folder_path):
+                return True
+        except Exception:
+            time.sleep(0.2)
+
+    # Fallback manual removal of remaining files
+    if os.path.exists(folder_path):
+        try:
+            for item in os.listdir(folder_path):
+                ipath = os.path.join(folder_path, item)
+                try:
+                    os.chmod(ipath, stat.S_IWRITE | stat.S_IWUSR)
+                    if os.path.isdir(ipath):
+                        shutil.rmtree(ipath, onerror=on_error)
+                    else:
+                        os.remove(ipath)
+                except Exception:
+                    pass
+            os.rmdir(folder_path)
+        except Exception:
+            pass
+
+    return not os.path.exists(folder_path)
+
+@app.route('/delete_user', methods=['POST'])
+@app.route('/delete_user/<path:username>', methods=['GET', 'POST'])
 @admin_required
-def delete_user(username):
-    """Delete a user from the system (Admin Only)"""
+def delete_user(username=None):
+    """
+    Delete a user from the system (Admin Only).
+    Resolves target whether identifier is exact folder name, roll ID, or display name.
+    """
+    if not username:
+        username = request.form.get('username') or request.form.get('roll') or request.args.get('username')
+    
+    if not username:
+        flash('No user specified for deletion.', 'error')
+        return redirect(url_for('list_users'))
+
+    username = str(username).strip()
+    target_folder = None
+    target_name = username
+    target_roll = None
+
+    # 1. Check direct folder match
+    direct_path = os.path.join(FACES_DIR, username)
+    if os.path.isdir(direct_path):
+        target_folder = direct_path
+        if '_' in username:
+            target_name, target_roll = username.rsplit('_', 1)
+        else:
+            target_name = username
+
+    # 2. Match by Roll ID, Display Name, or sanitized folder name
+    if not target_folder and os.path.isdir(FACES_DIR):
+        for f in os.listdir(FACES_DIR):
+            full_path = os.path.join(FACES_DIR, f)
+            if not os.path.isdir(full_path):
+                continue
+            if '_' in f:
+                f_name, f_roll = f.rsplit('_', 1)
+                if (username == f or 
+                    username.lower() == f.lower() or 
+                    username == f_roll or 
+                    username.lower() == f_name.lower()):
+                    target_folder = full_path
+                    target_name = f_name
+                    target_roll = f_roll
+                    break
+            else:
+                if username.lower() == f.lower():
+                    target_folder = full_path
+                    target_name = f
+                    break
+
+    if not target_folder or not os.path.exists(target_folder):
+        flash(f'User "{username}" not found in database.', 'error')
+        return redirect(url_for('list_users'))
+
     try:
-        user_folder = os.path.join(FACES_DIR, username)
-        if os.path.exists(user_folder):
-            import shutil
-            shutil.rmtree(user_folder)
-            # Retrain model after deletion or clean up if none remain
+        deleted = safe_remove_directory(target_folder)
+        if not deleted:
+            raise PermissionError(f"Could not remove folder {target_folder}. Files may be in use by another process or locked by OneDrive.")
+
+        # Clean up student credentials from users_auth.json
+        if target_roll:
+            try:
+                auth_data = load_user_auth()
+                if str(target_roll) in auth_data:
+                    del auth_data[str(target_roll)]
+                    save_user_auth(auth_data)
+            except Exception:
+                pass
+
+        # Retrain model after deletion or clean up if none remain
+        try:
             if totalreg() > 0:
                 train_model()
             else:
                 model_file = os.path.join(STATIC_DIR, 'face_recognition_model.pkl')
                 if os.path.exists(model_file):
                     os.remove(model_file)
-            flash(f'User {username} has been successfully deleted!', 'success')
-        else:
-            flash(f'User {username} not found!', 'error')
+        except Exception as train_err:
+            print(f"Warning during model retraining after deletion: {train_err}")
+
+        display_label = f"{target_name} (ID: {target_roll})" if target_roll else target_name
+        flash(f'User {display_label} has been successfully deleted!', 'success')
     except Exception as e:
         flash(f'Error deleting user: {str(e)}', 'error')
     
